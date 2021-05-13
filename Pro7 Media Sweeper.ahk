@@ -15,12 +15,26 @@ EnvGet, vUserProfile, USERPROFILE
 FileRefArray :=[]
 
 ; Set default directory locations
+Pro7AppDataLocatoin = %vuserProfile%\AppData\Roaming\RenewedVision\ProPresenter
 PresentationLocation = %vuserProfile%\Documents\ProPresenter\Libraries
 PlaylistLocation = %vuserProfile%\Documents\ProPresenter\Playlists
 MediaLocation = %vuserProfile%\Documents\ProPresenter\Media
 
+; Find ProPresenter's Support Files location setting
+; If the Support Files location is different than default, modify directory locations accordingly
+Loop, read, %Pro7AppDataLocatoin%\PathSettings.proPaths
+{
+	If RegExMatch(A_LoopReadLine,"(?<=Base=).*(?=\\\\;)",Pro7SupportFilePath)
+	{
+		Pro7SupportFilePath := StrReplace(Pro7SupportFilePath,"\\","\")
+		PresentationLocation = %Pro7SupportFilePath%\Libraries
+		PlaylistLocation = %Pro7SupportFilePath%\Playlists
+		MediaLocation = %Pro7SupportFilePath%\Media
+	}
+}
+
 ; Let user choose Media folder to sweep.  Defaults to ProPresenter's Auto-Managed Media folder
-FileSelectFolder, OutputVar, *%vuserProfile%\Documents\ProPresenter\Media, 0, Choose Media Folder to clean`n(Default is Pro7's Media folder)
+FileSelectFolder, OutputVar, *%MediaLocation%, 0, Choose Media Folder to clean`n(Default is Pro7's Media folder)
 if OutputVar =
 {
     MsgBox, You didn't select a folder.  `nScript will terminate.
