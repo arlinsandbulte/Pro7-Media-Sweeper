@@ -18,7 +18,7 @@ How it works:
 5. Swept Files can be reviewed and deleted without affecting any ProPresenter presentations or playlists.
 
 The following regex is used to find and extract all full file paths from the playlist files and *.pro presentation document files:
-"[A-z]:(\\.*\.([A-z|0-9]*))"
+"[A-z]:(\\.*\.[A-z|0-9]*)(?=)"
 This regex may not be perfect in finding all referenced file paths in the playlist and *.pro files.
 False positives (extracting a string of characters that are not actually a file path) are not a problem because there won’t be a corresponding real file that can be moved.
 False negatives (failing to recognize a valid path and not including it in the list of referenced paths) could cause a problem because files could be moved even when they are referenced and used in ProPresenter.
