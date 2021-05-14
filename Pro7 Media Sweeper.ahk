@@ -62,7 +62,7 @@ Loop Files, %PresentationLocation%\*.pro, R
 {
 	Loop, read, % A_LoopFileFullPath
 	{
-		If RegExMatch(A_LoopReadLine, "[A-z]:(\\.*\.([A-z|0-9]*))" , FilePath)
+		If RegExMatch(A_LoopReadLine, "[A-z]:(\\.*\.[A-z|0-9]*)(?=)" , FilePath)
 		{
 			FileRefArray.Push(FilePath)
 		}
@@ -75,7 +75,7 @@ Loop Files, %PlaylistLocation%\*, R  ; Recurse into subfolders.
 {
 	Loop, read, % A_LoopFileFullPath
 	{
-		If RegExMatch(A_LoopReadLine, "[A-z]:(\\.*\.([A-z|0-9]*))" , FilePath)
+		If RegExMatch(A_LoopReadLine, "[A-z]:(\\.*\.[A-z|0-9]*)(?=)" , FilePath)
 		{
 			FileRefArray.Push(FilePath)
 		}
