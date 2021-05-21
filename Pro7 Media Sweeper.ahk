@@ -11,8 +11,13 @@ IfMsgBox No
 ; Get the path for the current user's home directory and stores it in vUserProfile
 EnvGet, vUserProfile, USERPROFILE
 
+; Set Regex search strings to find Full file reference paths & Relative file reference paths
+FullRefRegex = (?<=[A-Z])[A-Z]:\\.*\.([0-9]|[a-z]|[A-Z])*(?=")
+RelRefRegex = (?<=.).*\.([0-9]|[a-z]|[A-Z])*(?=)
+
 ; Initialize list of file reference strings
-FileRefArray :=[]
+FileFullRefArray :=[]
+FileRelRefArray :=[]
 
 ; Set default directory locations
 Pro7AppDataLocatoin = %vuserProfile%\AppData\Roaming\RenewedVision\ProPresenter
@@ -57,27 +62,39 @@ else
 SplashTextOn , , , WORKING, WORKING
 
 ; Find all presentation files with a *.pro filename
-; Then parse each .pro file, extract all file paths, and save path strings into FileRefArray[]
-Loop Files, %PresentationLocation%\*.pro, R
+; Then parse each .pro file, extract all file paths, and save path strings into FileFullRefArray[] & FileRelRefArray[]
+Loop Files, %PresentationLocation%\*.pro, R  ; Recurse into subfolders.
 {
 	Loop, read, % A_LoopFileFullPath
 	{
-		If RegExMatch(A_LoopReadLine, "[A-z]:(\\.*\.[A-z|0-9]*)(?=)" , FilePath)
+		If RegExMatch(A_LoopReadLine, FullRefRegex , FilePath)
 		{
-			FileRefArray.Push(FilePath)
+			FilePath := StrReplace(FilePath, "/" , "\")
+			FileFullRefArray.Push(FilePath)
+		}
+		If RegExMatch(A_LoopReadLine, RelRefRegex , FilePath)
+		{
+			FilePath := StrReplace(FilePath, "/" , "\")
+			FileRelRefArray.Push(FilePath)
 		}
 	}
 }
 
 ; Find all playlist files
-; Then parse each playlist file, extract all file paths, and save path strings into FileRefArray[]
+; Then parse each playlist file, extract all file paths, and save path strings into FileFullRefArray[] & FileRelRefArray[]
 Loop Files, %PlaylistLocation%\*, R  ; Recurse into subfolders.
 {
 	Loop, read, % A_LoopFileFullPath
 	{
-		If RegExMatch(A_LoopReadLine, "[A-z]:(\\.*\.[A-z|0-9]*)(?=)" , FilePath)
+		If RegExMatch(A_LoopReadLine, FullRefRegex , FilePath)
 		{
-			FileRefArray.Push(FilePath)
+			FilePath := StrReplace(FilePath, "/" , "\")
+			FileFullRefArray.Push(FilePath)
+		}
+		If RegExMatch(A_LoopReadLine, RelRefRegex , FilePath)
+		{
+			FilePath := StrReplace(FilePath, "/" , "\")
+			FileRelRefArray.Push(FilePath)
 		}
 	}
 }
@@ -89,15 +106,22 @@ MoveCount := 0
 MoveErrors := 0
 Loop Files, %MediaLocation%\*, %recurse%
 {
-	RefsFound := 0
-	FileIndex := A_Index
-    Loop % FileRefArray.MaxIndex()
+	FullRefsFound := 0
+    Loop % FileFullRefArray.MaxIndex()
 	{
-		StringLower, refPathLower, % FileRefArray[A_Index]
-		StringLower, filePathLower, A_LoopFileFullPath
-		RefsFound := RefsFound + (refPathLower = filePathLower)
+		FullRefsFound := FullRefsFound + (InStr(A_LoopFileFullPath, FileFullRefArray[A_Index]) > 0)
 	}
-	If % RefsFound = 0
+	
+	If % FullRefsFound = 0
+	{
+		RelRefsFound := 0
+		Loop % FileRelRefArray.MaxIndex()
+		{
+			RelRefsFound := RelRefsFound + (InStr(A_LoopFileFullPath, FileRelRefArray[A_Index]) > 0)
+		}
+	}
+	
+	If % FullRefsFound + RelRefsFound = 0 ;no references found for this file.  Move it!
 	{
 		MoveLocation := SubStr(A_LoopFileFullPath, StrLen(MediaLocation)+2)
 		SplitPath, A_LoopFileFullPath , , FileDir, , , 
@@ -112,9 +136,7 @@ Loop Files, %MediaLocation%\*, %recurse%
 		{
 			MoveErrors := MoveErrors + 1
 		}
-		; FileDelete, %A_LoopFileFullPath%
 	}
-	
 }
 
 SplashTextOff
