@@ -28,8 +28,8 @@ def pick_media_folder():
 
 # This function does all the work of sweeping the chosen media folder
 def sweep_the_folder():
-    # set status indicator
-    status_label.config(text="Status: Working")
+    #  Set Button Status indication
+    btn_sweep_files.config(text="Working..........", state="disabled", relief="sunken")
     window.update()
 
     # Save timestamp of when sweep was performed.  Used later in log and moved files folder.
@@ -200,13 +200,18 @@ def sweep_the_folder():
     if not os.path.exists(log_file_path.parent):
         os.makedirs(log_file_path.parent)
 
-    log_file = open(log_file_path, "w")
-    for line in log_text:
-        log_file.write(line + "\n")
+    log_file = open(log_file_path, mode="w", encoding="utf-8")
+    try:
+        for line in log_text:
+            log_file.write(line + "\n")
+        log_file.close()
+    except BaseException as err:
+        # Something went wrong writing the log file. No further logging will be captured! Display error to user.
+        tk.messagebox.showinfo(title="Error!", message=err.__str__())
     log_file.close()
 
-    # Set Status indicator
-    status_label.config(text="Status: Done!")
+    # Set Button Status indication
+    btn_sweep_files.config(text="Finished", state="active", relief="raised")
     window.update()
 
     # Display pop-up when finished
@@ -216,8 +221,8 @@ def sweep_the_folder():
         msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
     tk.messagebox.showinfo(title="Done!", message=msg)
 
-    # Set Status indicator
-    status_label.config(text="Status: Ready")
+    # Set Button Status indication
+    btn_sweep_files.config(text="Sweep Media Files!", state="active", relief="raised")
     window.update()
 
 
@@ -273,6 +278,7 @@ window = tk.Tk()
 # icon = PhotoImage()  # TODO get window icon to work with pyinstaller
 # window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
 window.title("Pro7 Media Sweeper - " + script_version)
+window.config(borderwidth=10)
 
 path_label = tk.Label(master=window, text="Media Folder to Sweep:")
 path_label.pack()
@@ -290,10 +296,7 @@ cb = tk.IntVar(value=1)
 ck_sub_folders = tk.Checkbutton(master=window, text='Include sub folders', variable=cb, onvalue=1, offvalue=0)
 ck_sub_folders.pack()
 
-btn_sweep_files = tk.Button(master=window, text="Sweep Media Files!", command=sweep_the_folder)
+btn_sweep_files = tk.Button(master=window, text="Sweep Media Files!", command=sweep_the_folder, width=30)
 btn_sweep_files.pack()
-
-status_label = tk.Label(master=window, text="Status: Ready")
-status_label.pack()
 
 window.mainloop()
