@@ -211,7 +211,7 @@ def sweep_the_folder():
     log_file.close()
 
     # Set Button Status indication
-    btn_sweep_files.config(text="Finished", state="active", relief="raised")
+    btn_sweep_files.config(text="Finished", state="normal", relief="raised")
     window.update()
 
     # Display pop-up when finished
@@ -222,7 +222,7 @@ def sweep_the_folder():
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Set Button Status indication
-    btn_sweep_files.config(text="Sweep Media Files!", state="active", relief="raised")
+    btn_sweep_files.config(text="Sweep Media Files!", state="normal", relief="raised")
     window.update()
 
 
