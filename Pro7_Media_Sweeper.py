@@ -28,13 +28,21 @@ def pick_media_folder():
 
 # This function does all the work of sweeping the chosen media folder
 def sweep_the_folder():
-    sweep_folder_location = Path.expanduser(Path(path_entry.get()))
+    # set status indicator
+    status_label.config(text="Status: Working")
+    window.update()
+
+    # Save timestamp of when sweep was performed.  Used later in log and moved files folder.
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    # Set folder path locations
+    sweep_folder_location = Path.expanduser(Path(path_entry.get()))
     presentation_location = Path.expanduser(pro7_support_file_path) / "Libraries"
     playlist_location = Path.expanduser(pro7_support_file_path) / "Playlists"
     configuration_location = Path.expanduser(pro7_support_file_path) / "Configuration"
 
-    # Find all files in the chosen Media Location
+    # Find all files in the chosen Media Location.
+    # TODO: This is not very efficient if include subdirectories is not checked.
     media_files = []
     for subdir, dirs, files in os.walk(sweep_folder_location):
         for filename in files:
@@ -135,6 +143,7 @@ def sweep_the_folder():
     for i in range(len(media_files)):
         media_files[i] = Path(media_files[i])
 
+    # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
     files_to_move = []
     for media_file in media_files:
         ref_count = 0
@@ -153,6 +162,7 @@ def sweep_the_folder():
         if ref_count == 0:
             files_to_move.append(media_file)
 
+    # Move all unreferenced media files
     move_count = 0
     move_file_to_root_dir = home_dir / "Pro7 Media Sweeper" / Path("Swept Files (" + timestamp + ")")
     for move_file_from in files_to_move:
@@ -166,7 +176,8 @@ def sweep_the_folder():
         move_count = move_count + 1
 
     # Write Log File
-    log_text = ["Pro7 Media Sweeper Log file. " + timestamp, move_count.__str__() + " Files Moved",
+    log_text = ["Pro7 Media Sweeper Log file. " + timestamp,
+                move_count.__str__() + " Files Moved",
                 "User Home Directory was: " + home_dir.__str__(),
                 "Pro7 Support File Path was: " + pro7_support_file_path.__str__(),
                 "All Files in Media Folder to Sweep (" + sweep_folder_location.__str__() + "):"]
@@ -194,11 +205,20 @@ def sweep_the_folder():
         log_file.write(line + "\n")
     log_file.close()
 
+    # Set Status indicator
+    status_label.config(text="Status: Done!")
+    window.update()
+
+    # Display pop-up when finished
     if move_count == 0:
         msg = "No Unreferenced Media Files Found."
     else:
         msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
     tk.messagebox.showinfo(title="Done!", message=msg)
+
+    # Set Status indicator
+    status_label.config(text="Status: Ready")
+    window.update()
 
 
 # **********************************************************************************************************************
@@ -216,8 +236,6 @@ home_dir = Path.home()
 os_type = platform.system()
 
 # Find the Pro7 folders for settings, libraries, playlists, and media
-# media_location = Path("")
-
 if os_type == "Windows":  # Set folder locations for Windows Machine
     pro7_app_data_location = home_dir / "AppData/Roaming/RenewedVision/ProPresenter"
     if not os.path.exists(pro7_app_data_location):
@@ -273,7 +291,9 @@ ck_sub_folders = tk.Checkbutton(master=window, text='Include sub folders', varia
 ck_sub_folders.pack()
 
 btn_sweep_files = tk.Button(master=window, text="Sweep Media Files!", command=sweep_the_folder)
-
 btn_sweep_files.pack()
+
+status_label = tk.Label(master=window, text="Status: Ready")
+status_label.pack()
 
 window.mainloop()
