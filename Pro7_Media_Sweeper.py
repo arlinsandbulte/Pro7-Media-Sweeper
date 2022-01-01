@@ -190,7 +190,8 @@ def sweep_the_folder():
         os.makedirs(log_file_path.parent)
 
     log_file = open(log_file_path, "w")
-    log_file.writelines("\n".join(log_text))
+    for line in log_text:
+        log_file.write(line + "\n")
     log_file.close()
 
     if move_count == 0:
