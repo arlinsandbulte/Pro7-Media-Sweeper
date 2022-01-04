@@ -28,9 +28,6 @@ def pick_media_folder():
 
 # This function does all the work of sweeping the chosen media folder
 def sweep_the_folder():
-    #  Set Button Status indication
-    btn_sweep_files.config(text="Working..........", state="disabled", relief="sunken")
-    window.update()
 
     # Save timestamp of when sweep was performed.  Used later in log and moved files folder.
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -40,6 +37,16 @@ def sweep_the_folder():
     presentation_location = Path.expanduser(pro7_support_file_path) / "Libraries"
     playlist_location = Path.expanduser(pro7_support_file_path) / "Playlists"
     configuration_location = Path.expanduser(pro7_support_file_path) / "Configuration"
+
+    if not os.path.exists(sweep_folder_location):
+        msg = sweep_folder_location.__str__() + "\ndoes not exist!"
+        title = "ERROR! Sweep Folder not Found!"
+        tk.messagebox.showerror(title=title, message=msg)
+        return
+
+    #  Set Button Status indication
+    btn_sweep_files.config(text="Working..........", state="disabled", relief="sunken")
+    window.update()
 
     # Find all files in the chosen Media Location.
     # TODO: This is not very efficient if include subdirectories is not checked.
@@ -230,9 +237,6 @@ def sweep_the_folder():
 # Main program execution begins here
 
 script_version = "2.0-beta1"
-
-# get this script's current working directory
-cwd = Path(os.getcwd())
 
 # Get the user's home_dir directory
 home_dir = Path.home()
