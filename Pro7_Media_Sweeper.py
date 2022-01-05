@@ -170,15 +170,15 @@ def sweep_the_folder():
         ref_count = 0
         # Count file references in absolute_ref_list
         for ref in absolute_ref_list:
-            if media_file.__str__().upper() in ref.__str__().upper():
+            if media_file.__str__().upper().endswith(ref.__str__().upper()):
                 ref_count = ref_count + 1
         # Count file references in relative_ref_list
         for ref in relative_ref_list:
-            if ref.__str__().upper() in media_file.__str__().upper():
+            if media_file.__str__().upper().endswith(ref.__str__().upper()):
                 ref_count = ref_count + 1
         # Count file references in path_ref_list
         for ref in path_ref_list:
-            if ref.__str__().upper() in media_file.__str__().upper():
+            if media_file.__str__().upper().endswith(ref.__str__().upper()):
                 ref_count = ref_count + 1
         if ref_count == 0:
             files_to_move.append(media_file)
