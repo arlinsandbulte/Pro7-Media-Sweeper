@@ -261,7 +261,7 @@ def sweep_the_folder():
 script_version = "2.0-beta2"
 
 # Get the user's home_dir directory
-home_dir = Path.home()
+home_dir = Path.expanduser(Path.home())
 
 # Get the OS type this script is running on.
 os_type = platform.system()
