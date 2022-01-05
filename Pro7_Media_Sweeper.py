@@ -288,7 +288,7 @@ elif os_type == "Darwin":  # Set folder locations for Mac Machine
         pro7_pref_file = open(pro7_pref_file_path, mode='rb')
         pl = plistlib.load(pro7_pref_file)
         pro7_pref_file.close()
-        pro7_support_file_path = Path(pl["applicationShowDirectory"])
+        pro7_support_file_path = Path.expanduser(Path(pl["applicationShowDirectory"]))
     else:
         tk.messagebox.showerror(title="Warning!", message="ProPresenter 7 Installation not found!  Program will end")
         pro7_support_file_path = Path("Not Found")
