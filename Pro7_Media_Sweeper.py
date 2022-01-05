@@ -46,13 +46,15 @@ def sweep_the_folder():
 
     #  Set Button Status indication
     btn_sweep_files.config(text="Working..........", state="disabled", relief="sunken")
-    window.update()
+    btn_sweep_files.update()
 
     # Find all files in the chosen Media Location.
     # TODO: This is not very efficient if include subdirectories is not checked.
     media_files = []
     for subdir, dirs, files in os.walk(sweep_folder_location):
         for filename in files:
+            status_label.config(text="Found Media file:\n" + filename)
+            status_label.update()
             if cb.get() == 0 and subdir.upper == sweep_folder_location.__str__().upper:
                 # Include subdirectories is not checked.  Only add files in the root folder to media_files list
                 filepath = subdir + os.sep + filename
@@ -80,6 +82,8 @@ def sweep_the_folder():
         for filename in files:
             filepath = Path(subdir) / Path(filename)
             if (filepath.__str__()[-4:]) == ".pro":
+                status_label.config(text="Parsing:\n" + filename)
+                status_label.update()
                 pro7pres = presentation_pb2.Presentation()
                 file1 = open(filepath, mode='rb')
                 pro7pres.ParseFromString(file1.read())
@@ -91,6 +95,8 @@ def sweep_the_folder():
     # Find all media file references in PlayList files
     for subdir, dirs, files in os.walk(playlist_location):
         for filename in files:
+            status_label.config(text="Parsing:\n" + filename)
+            status_label.update()
             filepath = Path(subdir) / Path(filename)
             pro7playlist = propresenter_pb2.PlaylistDocument()
             file2 = open(filepath, mode='rb')
@@ -106,6 +112,8 @@ def sweep_the_folder():
     for subdir, dirs, files in os.walk(configuration_location):
         for filename in files:
             if filename == "Props":
+                status_label.config(text="Parsing:\n" + filename)
+                status_label.update()
                 filepath = Path(subdir) / Path(filename)
                 pro7_props_file = propDocument_pb2.PropDocument()
                 file2 = open(filepath, mode='rb')
@@ -115,6 +123,8 @@ def sweep_the_folder():
                 relative_ref_list.extend(re.findall(relative_ref_regex, pro7_props_file.__str__()))
                 path_ref_list.extend(re.findall(path_ref_regex, pro7_props_file.__str__()))
             if filename == "Workspace":
+                status_label.config(text="Parsing:\n" + filename)
+                status_label.update()
                 filepath = Path(subdir) / Path(filename)
                 pro7_workspace_file = proworkspace_pb2.ProPresenterWorkspace()
                 file2 = open(filepath, mode='rb')
@@ -124,6 +134,8 @@ def sweep_the_folder():
                 relative_ref_list.extend(re.findall(relative_ref_regex, pro7_workspace_file.__str__()))
                 path_ref_list.extend(re.findall(path_ref_regex, pro7_workspace_file.__str__()))
             if filename == "Stage":
+                status_label.config(text="Parsing:\n" + filename)
+                status_label.update()
                 filepath = Path(subdir) / Path(filename)
                 pro7_stage_file = stage_pb2.Stage.Document()
                 file2 = open(filepath, mode='rb')
@@ -151,6 +163,8 @@ def sweep_the_folder():
         media_files[i] = Path(media_files[i])
 
     # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
+    status_label.config(text="Building list of unreferenced files")
+    status_label.update()
     files_to_move = []
     for media_file in media_files:
         ref_count = 0
@@ -170,6 +184,8 @@ def sweep_the_folder():
             files_to_move.append(media_file)
 
     # Move all unreferenced media files
+    status_label.config(text="Moving Files")
+    status_label.update()
     move_count = 0
     move_file_to_root_dir = home_dir / "Pro7 Media Sweeper" / Path("Swept Files (" + timestamp + ")")
     for move_file_from in files_to_move:
@@ -183,6 +199,8 @@ def sweep_the_folder():
         move_count = move_count + 1
 
     # Write Log File
+    status_label.config(text="Writing Log file")
+    status_label.update()
     log_text = ["Pro7 Media Sweeper Log file. " + timestamp,
                 move_count.__str__() + " Files Moved",
                 "User Home Directory was: " + home_dir.__str__(),
@@ -219,7 +237,9 @@ def sweep_the_folder():
 
     # Set Button Status indication
     btn_sweep_files.config(text="Finished", state="normal", relief="raised")
-    window.update()
+    btn_sweep_files.update()
+    status_label.config(text="Done!")
+    status_label.update()
 
     # Display pop-up when finished
     if move_count == 0:
@@ -230,13 +250,15 @@ def sweep_the_folder():
 
     # Set Button Status indication
     btn_sweep_files.config(text="Sweep Media Files!", state="normal", relief="raised")
-    window.update()
+    btn_sweep_files.update()
+    status_label.config(text="Ready")
+    status_label.update()
 
 
 # **********************************************************************************************************************
 # Main program execution begins here
 
-script_version = "2.0-beta1"
+script_version = "2.0-beta2"
 
 # Get the user's home_dir directory
 home_dir = Path.home()
@@ -302,5 +324,8 @@ ck_sub_folders.pack()
 
 btn_sweep_files = tk.Button(master=window, text="Sweep Media Files!", command=sweep_the_folder, width=30)
 btn_sweep_files.pack()
+
+status_label = tk.Label(master=window, text="Ready")
+status_label.pack()
 
 window.mainloop()
