@@ -81,7 +81,7 @@ def sweep_the_folder():
     for subdir, dirs, files in os.walk(presentation_location):
         for filename in files:
             filepath = Path(subdir) / Path(filename)
-            if (filepath.__str__()[-4:]) == ".pro":
+            if filepath.__str__().upper().endswith(".PRO"):
                 status_label.config(text="Parsing:\n" + filename)
                 status_label.update()
                 pro7pres = presentation_pb2.Presentation()
@@ -111,7 +111,7 @@ def sweep_the_folder():
     # Find all media file references in Stage config file
     for subdir, dirs, files in os.walk(configuration_location):
         for filename in files:
-            if filename == "Props":
+            if filename.upper() == "PROPS":
                 status_label.config(text="Parsing:\n" + filename)
                 status_label.update()
                 filepath = Path(subdir) / Path(filename)
@@ -122,7 +122,7 @@ def sweep_the_folder():
                 absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7_props_file.__str__()))
                 relative_ref_list.extend(re.findall(relative_ref_regex, pro7_props_file.__str__()))
                 path_ref_list.extend(re.findall(path_ref_regex, pro7_props_file.__str__()))
-            if filename == "Workspace":
+            if filename.upper() == "WORKSPACE":
                 status_label.config(text="Parsing:\n" + filename)
                 status_label.update()
                 filepath = Path(subdir) / Path(filename)
@@ -133,7 +133,7 @@ def sweep_the_folder():
                 absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7_workspace_file.__str__()))
                 relative_ref_list.extend(re.findall(relative_ref_regex, pro7_workspace_file.__str__()))
                 path_ref_list.extend(re.findall(path_ref_regex, pro7_workspace_file.__str__()))
-            if filename == "Stage":
+            if filename.upper() == "STAGE":
                 status_label.config(text="Parsing:\n" + filename)
                 status_label.update()
                 filepath = Path(subdir) / Path(filename)
