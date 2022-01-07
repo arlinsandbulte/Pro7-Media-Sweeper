@@ -17,6 +17,22 @@ import proworkspace_pb2  # Used to decode Workspace configuration file, which co
 import stage_pb2  # Used to decode Stage configuration file.
 
 
+# This function deletes all empty folders in a directory.  Takes a Path object input.
+def remove_empty_directories(pathlib_root_dir):
+    # list all directories recursively and sort them by path,
+    # The longest first
+    dir_list = sorted(
+        pathlib_root_dir.glob("**"),
+        key=lambda p: len(str(p)),
+        reverse=True,
+    )
+    for pdir in dir_list:
+        try:
+            pdir.rmdir()  # remove directory if empty
+        except OSError:
+            continue  # catch and continue if non-empty
+
+
 # This function pops up a folder picking dialog and sets the path in the text entry box.
 def pick_media_folder():
     open_folder = filedialog.askdirectory(initialdir=path_entry.get())  # Returns opened path as str
@@ -48,6 +64,20 @@ def sweep_the_folder():
     btn_sweep_files.config(text="Working..........", state="disabled", relief="sunken")
     btn_sweep_files.update()
 
+    log_file_path = Path(home_dir / "Pro7 Media Sweeper" / Path("Sweep_Log (" + timestamp + ").log"))
+    if not os.path.exists(log_file_path.parent):
+        os.makedirs(log_file_path.parent)
+    log_file = open(log_file_path, mode="w", encoding="utf-8")
+    log_file.write("Pro7 Media Sweeper Log file. " + timestamp + "\n" +
+                   "Version:                     " + script_version + "\n" +
+                   "Chosen folder to sweep:      " + sweep_folder_location.__str__() + "\n" +
+                   "Include Subdirectories?:     " + cb.get().__str__() + "\n" +
+                   "User Home Directory:         " + home_dir.__str__() + "\n" +
+                   "Pro7 Support File Path:      " + pro7_support_file_path.__str__() + "\n" +
+                   "Pro7 Presentation Location:  " + presentation_location.__str__() + "\n" +
+                   "Pro7 Playlist Location:      " + playlist_location.__str__() + "\n" +
+                   "Pro7 Configuration Location: " + configuration_location.__str__() + "\n")
+
     # Find all files in the chosen Media Location.
     # TODO: This is not very efficient if include subdirectories is not checked.
     media_files = []
@@ -66,6 +96,10 @@ def sweep_the_folder():
 
     # Remove system files etc. from the media_files list, so they don't get swept.
     media_files = [s for s in media_files if Path(s).name[0] != "."]  # remove hidden files that start with "."
+
+    log_file.write("Found Media Files: \n")
+    for media_file in media_files:
+        log_file.write("--: " + media_file + "\n")
 
     # Define regex patterns to find media reference strings in ProPresenter files
     absolute_ref_regex = r"(?<= absolute_string: \").*(?=\")"
@@ -88,9 +122,19 @@ def sweep_the_folder():
                 file1 = open(filepath, mode='rb')
                 pro7pres.ParseFromString(file1.read())
                 file1.close()
-                absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7pres.__str__()))
-                relative_ref_list.extend(re.findall(relative_ref_regex, pro7pres.__str__()))
-                path_ref_list.extend(re.findall(path_ref_regex, pro7pres.__str__()))
+                log_file.write("Media References in: " + filepath.__str__() + "\n")
+                absolute_refs = re.findall(absolute_ref_regex, pro7pres.__str__())
+                absolute_ref_list.extend(absolute_refs)
+                for ref in absolute_refs:
+                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
+                relative_refs = re.findall(relative_ref_regex, pro7pres.__str__())
+                relative_ref_list.extend(relative_refs)
+                for ref in relative_refs:
+                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
+                path_refs = re.findall(path_ref_regex, pro7pres.__str__())
+                path_ref_list.extend(path_refs)
+                for ref in path_refs:
+                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
 
     # Find all media file references in PlayList files
     for subdir, dirs, files in os.walk(playlist_location):
@@ -102,9 +146,19 @@ def sweep_the_folder():
             file2 = open(filepath, mode='rb')
             pro7playlist.ParseFromString(file2.read())
             file2.close()
-            absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7playlist.__str__()))
-            relative_ref_list.extend(re.findall(relative_ref_regex, pro7playlist.__str__()))
-            path_ref_list.extend(re.findall(path_ref_regex, pro7playlist.__str__()))
+            log_file.write("Media References in: " + filepath.__str__() + "\n")
+            absolute_refs = re.findall(absolute_ref_regex, pro7playlist.__str__())
+            absolute_ref_list.extend(absolute_refs)
+            for ref in absolute_refs:
+                log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
+            relative_refs = re.findall(relative_ref_regex, pro7playlist.__str__())
+            relative_ref_list.extend(relative_refs)
+            for ref in relative_refs:
+                log_file.write("--Relative: " + Path(ref).__str__() + "\n")
+            path_refs = re.findall(path_ref_regex, pro7playlist.__str__())
+            path_ref_list.extend(path_refs)
+            for ref in path_refs:
+                log_file.write("--Path: " + Path(ref).__str__() + "\n")
 
     # Find all media file references in Props config file
     # Find all media file references in Masks (Workspace config file)
@@ -119,9 +173,19 @@ def sweep_the_folder():
                 file2 = open(filepath, mode='rb')
                 pro7_props_file.ParseFromString(file2.read())
                 file2.close()
-                absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7_props_file.__str__()))
-                relative_ref_list.extend(re.findall(relative_ref_regex, pro7_props_file.__str__()))
-                path_ref_list.extend(re.findall(path_ref_regex, pro7_props_file.__str__()))
+                log_file.write("Media References in: " + filepath.__str__() + "\n")
+                absolute_refs = re.findall(absolute_ref_regex, pro7_props_file.__str__())
+                absolute_ref_list.extend(absolute_refs)
+                for ref in absolute_refs:
+                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
+                relative_refs = re.findall(relative_ref_regex, pro7_props_file.__str__())
+                relative_ref_list.extend(relative_refs)
+                for ref in relative_refs:
+                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
+                path_refs = re.findall(path_ref_regex, pro7_props_file.__str__())
+                path_ref_list.extend(path_refs)
+                for ref in path_refs:
+                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
             if filename.upper() == "WORKSPACE":
                 status_label.config(text="Parsing:\n" + filename)
                 status_label.update()
@@ -130,9 +194,19 @@ def sweep_the_folder():
                 file2 = open(filepath, mode='rb')
                 pro7_workspace_file.ParseFromString(file2.read())
                 file2.close()
-                absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7_workspace_file.__str__()))
-                relative_ref_list.extend(re.findall(relative_ref_regex, pro7_workspace_file.__str__()))
-                path_ref_list.extend(re.findall(path_ref_regex, pro7_workspace_file.__str__()))
+                log_file.write("Media References in: " + filepath.__str__() + "\n")
+                absolute_refs = re.findall(absolute_ref_regex, pro7_workspace_file.__str__())
+                absolute_ref_list.extend(absolute_refs)
+                for ref in absolute_refs:
+                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
+                relative_refs = re.findall(relative_ref_regex, pro7_workspace_file.__str__())
+                relative_ref_list.extend(relative_refs)
+                for ref in relative_refs:
+                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
+                path_refs = re.findall(path_ref_regex, pro7_workspace_file.__str__())
+                path_ref_list.extend(path_refs)
+                for ref in path_refs:
+                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
             if filename.upper() == "STAGE":
                 status_label.config(text="Parsing:\n" + filename)
                 status_label.update()
@@ -141,9 +215,19 @@ def sweep_the_folder():
                 file2 = open(filepath, mode='rb')
                 pro7_stage_file.ParseFromString(file2.read())
                 file2.close()
-                absolute_ref_list.extend(re.findall(absolute_ref_regex, pro7_stage_file.__str__()))
-                relative_ref_list.extend(re.findall(relative_ref_regex, pro7_stage_file.__str__()))
-                path_ref_list.extend(re.findall(path_ref_regex, pro7_stage_file.__str__()))
+                log_file.write("Media References in: " + filepath.__str__() + "\n")
+                absolute_refs = re.findall(absolute_ref_regex, pro7_stage_file.__str__())
+                absolute_ref_list.extend(absolute_refs)
+                for ref in absolute_refs:
+                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
+                relative_refs = re.findall(relative_ref_regex, pro7_stage_file.__str__())
+                relative_ref_list.extend(relative_refs)
+                for ref in relative_refs:
+                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
+                path_refs = re.findall(path_ref_regex, pro7_stage_file.__str__())
+                path_ref_list.extend(path_refs)
+                for ref in path_refs:
+                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
 
     # Convert absolute_ref_list items from url encoding with % codes to plain text
     #   This only applies to Mac, but conversion is done on everything, just in case
@@ -196,43 +280,10 @@ def sweep_the_folder():
         if not os.path.exists(move_file_to.parent):
             os.makedirs(move_file_to.parent)
         shutil.move(move_file_from, move_file_to)
+        log_file.write("Moved file from: " + move_file_from.__str__() + "\n" +
+                       "-------------to: " + move_file_to.__str__() + "\n")
         move_count = move_count + 1
 
-    # Write Log File
-    status_label.config(text="Writing Log file")
-    status_label.update()
-    log_text = ["Pro7 Media Sweeper Log file. " + timestamp,
-                move_count.__str__() + " Files Moved",
-                "User Home Directory was: " + home_dir.__str__(),
-                "Pro7 Support File Path was: " + pro7_support_file_path.__str__(),
-                "All Files in Media Folder to Sweep (" + sweep_folder_location.__str__() + "):"]
-    for line in media_files:
-        log_text.append("- " + line.__str__())
-    log_text.append("Found Absolute_String References:")
-    for line in absolute_ref_list:
-        log_text.append("- " + line.__str__())
-    log_text.append("Found Relative_Path References:")
-    for line in relative_ref_list:
-        log_text.append("- " + line.__str__())
-    log_text.append("Found Path References:")
-    for line in path_ref_list:
-        log_text.append("- " + line.__str__())
-    log_text.append("Files to move:")
-    for line in files_to_move:
-        log_text.append("- " + line.__str__())
-
-    log_file_path = Path(home_dir / "Pro7 Media Sweeper" / Path("Sweep_Log (" + timestamp + ").log"))
-    if not os.path.exists(log_file_path.parent):
-        os.makedirs(log_file_path.parent)
-
-    log_file = open(log_file_path, mode="w", encoding="utf-8")
-    try:
-        for line in log_text:
-            log_file.write(line + "\n")
-        log_file.close()
-    except BaseException as err:
-        # Something went wrong writing the log file. No further logging will be captured! Display error to user.
-        tk.messagebox.showinfo(title="Error!", message=err.__str__())
     log_file.close()
 
     # Set Button Status indication
@@ -255,10 +306,61 @@ def sweep_the_folder():
     status_label.update()
 
 
-# **********************************************************************************************************************
-# Main program execution begins here
+# This function takes undoes a sweep
+def undo_sweep():
+    filetypes = (('log files', '*.log'),)
+    log_file_path = filedialog.askopenfilename(title="Open Log file to undo",
+                                               initialdir=(home_dir / "Pro7 Media Sweeper"),
+                                               filetypes=filetypes)
+    if log_file_path != "":
+        log_file = open(log_file_path, mode="r", encoding="UTF-8")
+        line = log_file.readline().rstrip("\n")
+        if line.startswith("Pro7 Media Sweeper Log file."):
+            line = log_file.readline().rstrip("\n")
+            if line.endswith(("v2.0-beta3",)):
+                moved_files_found_count = 0
+                files_moved_back_count = 0
+                matching_to_not_found_count = 0
+                swept_file_not_found_count = 0
+                swept_file_already_exists_count = 0
+                while line != "":
+                    line = log_file.readline().rstrip("\n")
+                    if line.startswith("Moved file from: "):
+                        moved_files_found_count = moved_files_found_count + 1
+                        line2 = log_file.readline().rstrip("\n")
+                        if line2.startswith("-------------to: "):
+                            logged_file_from = Path(line[17:])
+                            logged_file_to = Path(line2[17:])
+                            if logged_file_to.exists():
+                                if logged_file_from.exists() is False:
+                                    if logged_file_from.parent.exists() is False:
+                                        os.makedirs(logged_file_from.parent)
+                                    shutil.move(logged_file_to, logged_file_from)
+                                    files_moved_back_count = files_moved_back_count + 1
+                                else:
+                                    swept_file_already_exists_count = swept_file_already_exists_count + 1
+                            else:
+                                swept_file_not_found_count = swept_file_not_found_count + 1
+                        else:
+                            matching_to_not_found_count = matching_to_not_found_count + 1
+                            log_file.seek(-1, 1)  # Move file pointer back one line to catch on next loop
+                remove_empty_directories(Path(log_file_path).parent)
+                msg = moved_files_found_count.__str__() + " Moved files found in log file.\n" + \
+                    files_moved_back_count.__str__() + " Files moved back.\n\n" + \
+                    matching_to_not_found_count.__str__() + " Errors: Matching \'to\' file paths not found.\n" + \
+                    swept_file_not_found_count.__str__() + " Errors: Source files not found.\n" + \
+                    swept_file_already_exists_count.__str__() + " Errors: Destination Files already exist.\n"
+                tk.messagebox.showinfo(title="Done!", message=msg)
+            else:
+                tk.messagebox.showinfo(title="Error!", message="Unsupported log version.")
+        else:
+            tk.messagebox.showinfo(title="Error!", message="Invalid log file format")
+        log_file.close()
 
-script_version = "2.0-beta2"
+
+# Main program execution begins here ***********************************************************************************
+
+script_version = "v2.0-beta3"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -327,5 +429,8 @@ btn_sweep_files.pack()
 
 status_label = tk.Label(master=window, text="Ready")
 status_label.pack()
+
+btn_undo_sweep = tk.Button(master=window, text="Undo a Sweep", command=undo_sweep, width=30)
+btn_undo_sweep.pack()
 
 window.mainloop()
