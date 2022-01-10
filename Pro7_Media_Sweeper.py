@@ -383,6 +383,7 @@ window = tk.Tk()
 # window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
 window.title("Pro7 Media Sweeper - " + script_version)
 window.config(borderwidth=10)
+window.resizable(False, False)
 
 path_label = tk.Label(master=window, text="Media Folder to Sweep:")
 path_label.pack()
