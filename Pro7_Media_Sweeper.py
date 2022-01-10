@@ -408,7 +408,7 @@ btn_sweep_files = tk.Button(master=window,
                             text="Sweep Media Files!",
                             command=sweep_the_folder,
                             width=30,
-                            font=('TkDefaultFont', 0, 'bold', 'italic'))
+                            font=('TkDefaultFont', 0, 'bold'))
 btn_sweep_files.pack()
 
 status_label = tk.Label(master=window, text="Ready")
