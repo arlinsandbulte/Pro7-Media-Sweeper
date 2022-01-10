@@ -17,6 +17,44 @@ import proworkspace_pb2  # Used to decode Workspace configuration file, which co
 import stage_pb2  # Used to decode Stage configuration file.
 
 
+# Write to file (add new line at end and catch errors)
+def write_file_line(file, text):
+    try:
+        file.write(text + "\n")
+    except BaseException as err:
+        # Something went wrong writing the log file. No further logging will be captured! Display error to user.
+        tk.messagebox.showinfo(title="Error!", message=repr(err))
+
+
+# This function returns all reference strings in a Pro7 file
+def get_refs_in_file(file_obj, path, log_file):
+    status_label.config(text="Parsing:\n" + path.name)
+    status_label.update()
+
+    # Define regex patterns to find media reference strings in ProPresenter files
+    absolute_ref_regex = r"(?<= absolute_string: \").*(?=\")"
+    relative_ref_regex = r"(?<= relative_path: \").*(?=\")"
+    path_ref_regex = r"(?<= path: \").*(?=\")"
+
+    file1 = open(path, mode='rb')
+    try:
+        file_obj.ParseFromString(file1.read())
+    except BaseException as err:
+        write_file_line(log_file, 'ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name)
+    file1.close()
+    write_file_line(log_file, "Media References in: " + path.__str__())
+    absolute_refs = re.findall(absolute_ref_regex, file_obj.__str__())
+    for ref in absolute_refs:
+        write_file_line(log_file, "--Absolute: " + Path(ref).__str__())
+    relative_refs = re.findall(relative_ref_regex, file_obj.__str__())
+    for ref in relative_refs:
+        write_file_line(log_file, "--Relative: " + Path(ref).__str__())
+    path_refs = re.findall(path_ref_regex, file_obj.__str__())
+    for ref in path_refs:
+        write_file_line(log_file, "--Path: " + Path(ref).__str__())
+    return {"absolute_refs": absolute_refs, "relative_refs": relative_refs, "path_refs": path_refs}
+
+
 # This function deletes all empty folders in a directory.  Takes a Path object input.
 def remove_empty_directories(pathlib_root_dir):
     # list all directories recursively and sort them by path,
@@ -74,15 +112,16 @@ def sweep_the_folder():
     if not os.path.exists(log_file_path.parent):
         os.makedirs(log_file_path.parent)
     log_file = open(log_file_path, mode="w", encoding="utf-8")
-    log_file.write("Pro7 Media Sweeper Log file. " + timestamp + "\n" +
-                   "Version:                     " + script_version + "\n" +
-                   "Chosen folder to sweep:      " + sweep_folder_location.__str__() + "\n" +
-                   "Include Subdirectories?:     " + cb.get().__str__() + "\n" +
-                   "User Home Directory:         " + home_dir.__str__() + "\n" +
-                   "Pro7 Support File Path:      " + pro7_support_file_path.__str__() + "\n" +
-                   "Pro7 Presentation Location:  " + presentation_location.__str__() + "\n" +
-                   "Pro7 Playlist Location:      " + playlist_location.__str__() + "\n" +
-                   "Pro7 Configuration Location: " + configuration_location.__str__() + "\n")
+    write_file_line(log_file,
+                    "Pro7 Media Sweeper Log file. " + timestamp + "\n" +
+                    "Version:                     " + script_version + "\n" +
+                    "Chosen folder to sweep:      " + sweep_folder_location.__str__() + "\n" +
+                    "Include Subdirectories?:     " + cb.get().__str__() + "\n" +
+                    "User Home Directory:         " + home_dir.__str__() + "\n" +
+                    "Pro7 Support File Path:      " + pro7_support_file_path.__str__() + "\n" +
+                    "Pro7 Presentation Location:  " + presentation_location.__str__() + "\n" +
+                    "Pro7 Playlist Location:      " + playlist_location.__str__() + "\n" +
+                    "Pro7 Configuration Location: " + configuration_location.__str__())
 
     # Find all files in the chosen Media Location.
     # TODO: This is not very efficient if include subdirectories is not checked.
@@ -103,14 +142,9 @@ def sweep_the_folder():
     # Remove system files etc. from the media_files list, so they don't get swept.
     media_files = [s for s in media_files if Path(s).name[0] != "."]  # remove hidden files that start with "."
 
-    log_file.write("Found Media Files: \n")
+    write_file_line(log_file, "Found Media Files: ")
     for media_file in media_files:
-        log_file.write("--: " + media_file + "\n")
-
-    # Define regex patterns to find media reference strings in ProPresenter files
-    absolute_ref_regex = r"(?<= absolute_string: \").*(?=\")"
-    relative_ref_regex = r"(?<= relative_path: \").*(?=\")"
-    path_ref_regex = r"(?<= path: \").*(?=\")"
+        write_file_line(log_file, "--: " + media_file)
 
     # Initialize media file reference lists
     absolute_ref_list = []
@@ -123,54 +157,20 @@ def sweep_the_folder():
             if filename.upper().endswith(".PRO"):
                 pro7_file_obj = presentation_pb2.Presentation()
                 filepath = Path(subdir) / Path(filename)
-                status_label.config(text="Parsing:\n" + filename)
-                status_label.update()
-                file1 = open(filepath, mode='rb')
-                try:
-                    pro7_file_obj.ParseFromString(file1.read())
-                except BaseException as err:
-                    log_file.write('ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name + '\n')
-                file1.close()
-                log_file.write("Media References in: " + filepath.__str__() + "\n")
-                absolute_refs = re.findall(absolute_ref_regex, pro7_file_obj.__str__())
-                absolute_ref_list.extend(absolute_refs)
-                for ref in absolute_refs:
-                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
-                relative_refs = re.findall(relative_ref_regex, pro7_file_obj.__str__())
-                relative_ref_list.extend(relative_refs)
-                for ref in relative_refs:
-                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
-                path_refs = re.findall(path_ref_regex, pro7_file_obj.__str__())
-                path_ref_list.extend(path_refs)
-                for ref in path_refs:
-                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                absolute_ref_list.extend(file_refs["absolute_refs"])
+                relative_ref_list.extend(file_refs["relative_refs"])
+                path_ref_list.extend(file_refs["path_refs"])
 
     # Find all media file references in PlayList files
     for subdir, dirs, files in os.walk(playlist_location):
         for filename in files:
             pro7_file_obj = propresenter_pb2.PlaylistDocument()
             filepath = Path(subdir) / Path(filename)
-            status_label.config(text="Parsing:\n" + filename)
-            status_label.update()
-            file1 = open(filepath, mode='rb')
-            try:
-                pro7_file_obj.ParseFromString(file1.read())
-            except BaseException as err:
-                log_file.write('ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name + '\n')
-            file1.close()
-            log_file.write("Media References in: " + filepath.__str__() + "\n")
-            absolute_refs = re.findall(absolute_ref_regex, pro7_file_obj.__str__())
-            absolute_ref_list.extend(absolute_refs)
-            for ref in absolute_refs:
-                log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
-            relative_refs = re.findall(relative_ref_regex, pro7_file_obj.__str__())
-            relative_ref_list.extend(relative_refs)
-            for ref in relative_refs:
-                log_file.write("--Relative: " + Path(ref).__str__() + "\n")
-            path_refs = re.findall(path_ref_regex, pro7_file_obj.__str__())
-            path_ref_list.extend(path_refs)
-            for ref in path_refs:
-                log_file.write("--Path: " + Path(ref).__str__() + "\n")
+            file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+            absolute_ref_list.extend(file_refs["absolute_refs"])
+            relative_ref_list.extend(file_refs["relative_refs"])
+            path_ref_list.extend(file_refs["path_refs"])
 
     # Find all media file references in Props config file
     # Find all media file references in Masks (Workspace config file)
@@ -180,75 +180,24 @@ def sweep_the_folder():
             if filename.upper() == "PROPS":
                 pro7_file_obj = propDocument_pb2.PropDocument()
                 filepath = Path(subdir) / Path(filename)
-                status_label.config(text="Parsing:\n" + filename)
-                status_label.update()
-                file1 = open(filepath, mode='rb')
-                try:
-                    pro7_file_obj.ParseFromString(file1.read())
-                except BaseException as err:
-                    log_file.write('ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name + '\n')
-                file1.close()
-                log_file.write("Media References in: " + filepath.__str__() + "\n")
-                absolute_refs = re.findall(absolute_ref_regex, pro7_file_obj.__str__())
-                absolute_ref_list.extend(absolute_refs)
-                for ref in absolute_refs:
-                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
-                relative_refs = re.findall(relative_ref_regex, pro7_file_obj.__str__())
-                relative_ref_list.extend(relative_refs)
-                for ref in relative_refs:
-                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
-                path_refs = re.findall(path_ref_regex, pro7_file_obj.__str__())
-                path_ref_list.extend(path_refs)
-                for ref in path_refs:
-                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                absolute_ref_list.extend(file_refs["absolute_refs"])
+                relative_ref_list.extend(file_refs["relative_refs"])
+                path_ref_list.extend(file_refs["path_refs"])
             if filename.upper() == "WORKSPACE":
                 pro7_file_obj = proworkspace_pb2.ProPresenterWorkspace()
                 filepath = Path(subdir) / Path(filename)
-                status_label.config(text="Parsing:\n" + filename)
-                status_label.update()
-                file1 = open(filepath, mode='rb')
-                try:
-                    pro7_file_obj.ParseFromString(file1.read())
-                except BaseException as err:
-                    log_file.write('ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name + '\n')
-                file1.close()
-                log_file.write("Media References in: " + filepath.__str__() + "\n")
-                absolute_refs = re.findall(absolute_ref_regex, pro7_file_obj.__str__())
-                absolute_ref_list.extend(absolute_refs)
-                for ref in absolute_refs:
-                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
-                relative_refs = re.findall(relative_ref_regex, pro7_file_obj.__str__())
-                relative_ref_list.extend(relative_refs)
-                for ref in relative_refs:
-                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
-                path_refs = re.findall(path_ref_regex, pro7_file_obj.__str__())
-                path_ref_list.extend(path_refs)
-                for ref in path_refs:
-                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                absolute_ref_list.extend(file_refs["absolute_refs"])
+                relative_ref_list.extend(file_refs["relative_refs"])
+                path_ref_list.extend(file_refs["path_refs"])
             if filename.upper() == "STAGE":
                 pro7_file_obj = stage_pb2.Stage.Document()
                 filepath = Path(subdir) / Path(filename)
-                status_label.config(text="Parsing:\n" + filename)
-                status_label.update()
-                file1 = open(filepath, mode='rb')
-                try:
-                    pro7_file_obj.ParseFromString(file1.read())
-                except BaseException as err:
-                    log_file.write('ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name + '\n')
-                file1.close()
-                log_file.write("Media References in: " + filepath.__str__() + "\n")
-                absolute_refs = re.findall(absolute_ref_regex, pro7_file_obj.__str__())
-                absolute_ref_list.extend(absolute_refs)
-                for ref in absolute_refs:
-                    log_file.write("--Absolute: " + Path(ref).__str__() + "\n")
-                relative_refs = re.findall(relative_ref_regex, pro7_file_obj.__str__())
-                relative_ref_list.extend(relative_refs)
-                for ref in relative_refs:
-                    log_file.write("--Relative: " + Path(ref).__str__() + "\n")
-                path_refs = re.findall(path_ref_regex, pro7_file_obj.__str__())
-                path_ref_list.extend(path_refs)
-                for ref in path_refs:
-                    log_file.write("--Path: " + Path(ref).__str__() + "\n")
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                absolute_ref_list.extend(file_refs["absolute_refs"])
+                relative_ref_list.extend(file_refs["relative_refs"])
+                path_ref_list.extend(file_refs["path_refs"])
 
     # Convert absolute_ref_list items from url encoding with % codes to plain text
     #   This only applies to Mac, but conversion is done on everything, just in case
@@ -301,8 +250,8 @@ def sweep_the_folder():
         if not os.path.exists(move_file_to.parent):
             os.makedirs(move_file_to.parent)
         shutil.move(move_file_from, move_file_to)
-        log_file.write("Moved file from: " + move_file_from.__str__() + "\n" +
-                       "-------------to: " + move_file_to.__str__() + "\n")
+        write_file_line(log_file, "Moved file from: " + move_file_from.__str__() + "\n" +
+                        "-------------to: " + move_file_to.__str__())
         move_count = move_count + 1
 
     log_file.close()
@@ -404,9 +353,9 @@ if os_type == "Windows":  # Set folder locations for Windows Machine
     pro7_support_file_path = home_dir / "Documents/ProPresenter"
     media_location = home_dir / "/Documents/ProPresenter/Media"
     if os.path.exists(pro7_app_data_location / "PathSettings.proPaths"):
-        file = open(pro7_app_data_location / "PathSettings.proPaths", 'r')
-        file_lines = file.readlines()
-        file.close()
+        path_settings_file = open(pro7_app_data_location / "PathSettings.proPaths", 'r')
+        file_lines = path_settings_file.readlines()
+        path_settings_file.close()
         for file_line in file_lines:
             result = re.search(r"(?<=Base=).*(?=\\\\;)", file_line.strip())
             if result.group(0) != "":
