@@ -293,7 +293,8 @@ def undo_sweep():
         line = log_file.readline().rstrip("\n")
         if line.startswith("Pro7 Media Sweeper Log file."):
             line = log_file.readline().rstrip("\n")
-            if line.endswith(("v2.0-beta3",)):
+            if line.endswith(("v2.0-beta3",
+                              "v2.0-RC1")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -336,7 +337,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.0-beta3"
+script_version = "v2.0-RC1"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -401,13 +402,17 @@ cb = tk.IntVar(value=1)
 ck_sub_folders = tk.Checkbutton(master=window, text='Include sub folders', variable=cb, onvalue=1, offvalue=0)
 ck_sub_folders.pack()
 
-btn_sweep_files = tk.Button(master=window, text="Sweep Media Files!", command=sweep_the_folder, width=30)
+btn_sweep_files = tk.Button(master=window,
+                            text="Sweep Media Files!",
+                            command=sweep_the_folder,
+                            width=30,
+                            font=('TkDefaultFont', 0, 'bold', 'italic'))
 btn_sweep_files.pack()
 
 status_label = tk.Label(master=window, text="Ready")
 status_label.pack()
 
-btn_undo_sweep = tk.Button(master=window, text="Undo a Sweep", command=undo_sweep, width=30)
+btn_undo_sweep = tk.Button(master=window, text="Undo a Sweep (Pick Log File)", command=undo_sweep)
 btn_undo_sweep.pack()
 
 window.mainloop()
