@@ -253,8 +253,10 @@ def sweep_the_folder():
         write_file_line(log_file, "Moved file from: " + move_file_from.__str__() + "\n" +
                         "-------------to: " + move_file_to.__str__())
         move_count = move_count + 1
-
     log_file.close()
+
+    # remove_empty_directories(pathlib_root_dir)
+    remove_empty_directories(sweep_folder_location)
 
     # Set Button Status indication
     btn_sweep_files.config(text="Finished", state="normal", relief="raised")
