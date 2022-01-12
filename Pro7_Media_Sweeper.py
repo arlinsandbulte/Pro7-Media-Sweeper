@@ -8,7 +8,7 @@ from urllib.parse import unquote
 from datetime import datetime
 from tkinter import filedialog
 from tkinter import messagebox
-# from tkinter import PhotoImage
+from tkinter import PhotoImage
 from pathlib import Path
 import presentation_pb2  # Used to decode *.pro files
 import propresenter_pb2  # Used to decode PlayList files, which do not have an extension
@@ -28,7 +28,7 @@ def write_file_line(file, text):
 
 # This function returns all reference strings in a Pro7 file
 def get_refs_in_file(file_obj, path, log_file):
-    status_label.config(text="Parsing:\n" + path.name)
+    status_label.config(text="Parsing: " + path.name)
     status_label.update()
 
     # Define regex patterns to find media reference strings in ProPresenter files
@@ -105,7 +105,7 @@ def sweep_the_folder():
     btn_undo_sweep.config(state="disabled")
 
     #  Set Button Status indication
-    btn_sweep_files.config(text="Working..........", state="disabled", relief="sunken")
+    btn_sweep_files.config(state="disabled", relief="sunken")
     btn_sweep_files.update()
 
     log_file_path = Path(home_dir / "Pro7 Media Sweeper" / Path("Sweep_Log (" + timestamp + ").log"))
@@ -128,7 +128,7 @@ def sweep_the_folder():
     media_files = []
     for subdir, dirs, files in os.walk(sweep_folder_location):
         for filename in files:
-            status_label.config(text="Found Media file:\n" + filename)
+            status_label.config(text="Found Media file: " + filename)
             status_label.update()
             if cb.get() == 0 and subdir.upper == sweep_folder_location.__str__().upper:
                 # Include subdirectories is not checked.  Only add files in the root folder to media_files list
@@ -278,7 +278,7 @@ def sweep_the_folder():
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Set Button Status indication
-    btn_sweep_files.config(text="Sweep Media Files!", state="normal", relief="raised")
+    btn_sweep_files.config(text="Sweep\nMedia Files!", state="normal", relief="raised")
     btn_sweep_files.update()
     status_label.config(text="Ready")
     status_label.update()
@@ -388,34 +388,37 @@ window.title("Pro7 Media Sweeper - " + script_version)
 window.config(borderwidth=10)
 window.resizable(False, False)
 
-path_label = tk.Label(master=window, text="Media Folder to Sweep:")
-path_label.pack()
+img = PhotoImage(file='icon_files/Sweeper64.png')
+image = tk.Label(master=window, image=img)
+image.grid(column=1, row=1, sticky=tk.NW)
 
-path_text_frame = tk.Frame(relief=tk.SUNKEN, borderwidth=2)
+path_label = tk.Label(master=window,
+                      text="Media Folder to Sweep:",
+                      font=('TkDefaultFont', 0, 'bold'))
+path_label.grid(column=1, row=1, columnspan=2, sticky=tk.NW, padx=80, pady=10)
+
+path_text_frame = tk.Frame(relief=tk.SUNKEN, borderwidth=0)
 path_entry = tk.Entry(master=path_text_frame, width=80)
 path_entry.insert(0, media_location.__str__())
-path_entry.pack()
-path_text_frame.pack()
+path_entry.grid(column=2, row=2)
+path_text_frame.grid(column=1, row=1, rowspan=2, columnspan=2, sticky=tk.W, padx=80, pady=30)
 
-btn_pick_folder = tk.Button(master=window, text="Change Folder to Sweep", command=pick_media_folder)
-btn_pick_folder.pack()
+btn_pick_folder = tk.Button(master=window, text='Change Folder', command=pick_media_folder)
+btn_pick_folder.grid(column=2, row=1, rowspan=2, sticky=tk.E)
 
 cb = tk.IntVar(value=1)
 ck_sub_folders = tk.Checkbutton(master=window, text='Include sub folders', variable=cb, onvalue=1, offvalue=0)
-ck_sub_folders.pack()
-
+ck_sub_folders.grid(column=2, row=2, sticky=tk.NE)
 btn_sweep_files = tk.Button(master=window,
-                            text="Sweep Media Files!",
+                            text="Sweep\nMedia Files!",
                             command=sweep_the_folder,
-                            width=30,
-                            font=('TkDefaultFont', 0, 'bold'),
-                            disabledforeground="red")
-btn_sweep_files.pack()
+                            font=('TkDefaultFont', 0, 'bold'))
+btn_sweep_files.grid(column=2, row=4, sticky=tk.SE, padx=20)
 
 status_label = tk.Label(master=window, text="Ready")
-status_label.pack()
+status_label.grid(column=1, row=2, rowspan=2, sticky=tk.NW)
 
-btn_undo_sweep = tk.Button(master=window, text="Undo a Sweep (Pick Log File)", command=undo_sweep)
-btn_undo_sweep.pack()
+btn_undo_sweep = tk.Button(master=window, text="Undo a Sweep\n(Pick Log File)", command=undo_sweep)
+btn_undo_sweep.grid(column=1, row=4, rowspan=2, pady=10, sticky=tk.NW)
 
 window.mainloop()
