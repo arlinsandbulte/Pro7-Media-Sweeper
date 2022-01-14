@@ -393,50 +393,56 @@ window = tk.Tk()
 # icon = PhotoImage()  # TODO get window icon to work with pyinstaller
 # window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
 window.title("Pro7 Media Sweeper - " + script_version)
-window.geometry("870x180")
 window.config(border=15)
-window.resizable(False, False)
+window.minsize(600, 100)
+window.resizable(True, False)
 
-image_header = tk.Frame(window)
-main_frame = tk.Frame(window, padx=5, pady=5)
-
-image_header.grid(row=0, column=0, rowspan=1)
-main_frame.grid(row=0, column=1)
+top_frame = tk.Frame(window)
 
 img_path = base_path / 'icon_files/Sweeper64.png'
 img = PhotoImage(file=img_path)
-image = tk.Label(image_header, image=img)
-image.grid()
+image = tk.Label(top_frame, image=img)
+image.pack(side="left")
 
-path_label = tk.Label(main_frame,
+inside_top_frame = tk.Frame(top_frame,)
+
+path_label = tk.Label(inside_top_frame,
                       text="Media Folder to Sweep:",
-                      font=('TkDefaultFont', 15, 'bold'))
-path_label.pack(anchor=tk.W)
+                      font=('TkDefaultFont', 0, 'bold'))
+path_label.pack(anchor="w")
 
-path_text_frame = tk.Frame(main_frame, relief=tk.SUNKEN, borderwidth=0)
-path_entry = tk.Entry(master=path_text_frame, width=70)
+path_text_frame = tk.Frame(inside_top_frame, relief=tk.SUNKEN, borderwidth=0)
+path_entry = tk.Entry(master=path_text_frame)
 path_entry.insert(0, media_location.__str__())
-path_entry.grid()
-path_text_frame.pack(side=tk.LEFT)
+path_entry.pack(fill="x")
+path_text_frame.pack(fill="x")
 
-btn_pick_folder = tk.Button(main_frame, text='Change Folder', command=pick_media_folder)
-btn_pick_folder.pack(side=tk.LEFT)
+btn_pick_folder = tk.Button(top_frame, text='Change Folder', command=pick_media_folder)
+btn_pick_folder.pack(side="right", anchor="se")
 
+inside_top_frame.pack(fill="x", side="bottom")
+top_frame.pack(side="top", fill="x")
+
+mid_frame = tk.Frame(window)
 cb = tk.IntVar(value=1)
-ck_sub_folders = tk.Checkbutton(window, text='Include All Sub folders', variable=cb, onvalue=1, offvalue=0)
-ck_sub_folders.grid(column=1, row=2, padx=5, sticky=tk.E)
+ck_sub_folders = tk.Checkbutton(mid_frame, text='Include All Sub folders', variable=cb, onvalue=1, offvalue=0)
+ck_sub_folders.pack(side="right", anchor="e")
 
+status_label = tk.Label(mid_frame, text="")
+status_label.pack(side="left")
 
-status_label = tk.Label(window, text="")
-status_label.grid(column=0, columnspan=2, row=2, sticky=tk.W)
+mid_frame.pack(fill="x")
 
-btn_undo_sweep = tk.Button(window, text="Undo a Sweep (Pick Log File)", command=undo_sweep)
-btn_undo_sweep.place(y=120, x=0)
+bot_frame = tk.Frame(window)
 
-btn_sweep_files = tk.Button(window,
+btn_undo_sweep = tk.Button(bot_frame, text="Undo a Sweep (Pick Log File)", command=undo_sweep)
+btn_undo_sweep.pack(side="left")
+
+btn_sweep_files = tk.Button(bot_frame,
                             text="Sweep Media Files!",
                             command=sweep_the_folder,
                             font=('TkDefaultFont', 0, 'bold'))
-btn_sweep_files.place(y=120, x=625)
+btn_sweep_files.pack(side="right")
+bot_frame.pack(fill="x")
 
 window.mainloop()
