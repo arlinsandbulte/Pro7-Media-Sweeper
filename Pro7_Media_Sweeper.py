@@ -395,7 +395,8 @@ window = tk.Tk()
 window.title("Pro7 Media Sweeper - " + script_version)
 window.config(border=15)
 window.minsize(600, 100)
-window.resizable(True, False)
+window.maxsize(600, 1000)
+window.resizable(False, False)
 
 top_frame = tk.Frame(window)
 
@@ -426,9 +427,9 @@ top_frame.pack(side="top", fill="x")
 mid_frame = tk.Frame(window)
 cb = tk.IntVar(value=1)
 ck_sub_folders = tk.Checkbutton(mid_frame, text='Include All Sub folders', variable=cb, onvalue=1, offvalue=0)
-ck_sub_folders.pack(side="right", anchor="e")
+ck_sub_folders.pack(side="right")
 
-status_label = tk.Label(mid_frame, text="")
+status_label = tk.Label(mid_frame, text="", anchor="w")
 status_label.pack(side="left")
 
 mid_frame.pack(fill="x")
