@@ -394,18 +394,19 @@ window = tk.Tk()
 # window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
 window.title("Pro7 Media Sweeper - " + script_version)
 window.config(border=15)
-window.minsize(600, 100)
-window.maxsize(600, 1000)
-window.resizable(False, False)
+window.minsize(800, 0)
+window.maxsize(1200, 250)
+window.resizable(True, False)
+
 
 top_frame = tk.Frame(window)
 
 img_path = base_path / 'icon_files/Sweeper64.png'
 img = PhotoImage(file=img_path)
 image = tk.Label(top_frame, image=img)
-image.pack(side="left")
+image.pack(side="left", pady=(1, 0))
 
-inside_top_frame = tk.Frame(top_frame,)
+inside_top_frame = tk.Frame(top_frame, pady=(3))
 
 path_label = tk.Label(inside_top_frame,
                       text="Media Folder to Sweep:",
@@ -419,20 +420,22 @@ path_entry.pack(fill="x")
 path_text_frame.pack(fill="x")
 
 btn_pick_folder = tk.Button(top_frame, text='Change Folder', command=pick_media_folder)
-btn_pick_folder.pack(side="right", anchor="se")
+btn_pick_folder.pack(side="right", anchor="se", pady=(0, 5))
 
 inside_top_frame.pack(fill="x", side="bottom")
 top_frame.pack(side="top", fill="x")
 
 mid_frame = tk.Frame(window)
+
+status_label = tk.Label(mid_frame, text="")
+status_label.pack(side="left")
+status_label.place(rely=".5", anchor="w")
+
 cb = tk.IntVar(value=1)
 ck_sub_folders = tk.Checkbutton(mid_frame, text='Include All Sub folders', variable=cb, onvalue=1, offvalue=0)
 ck_sub_folders.pack(side="right")
 
-status_label = tk.Label(mid_frame, text="", anchor="w")
-status_label.pack(side="left")
-
-mid_frame.pack(fill="x")
+mid_frame.pack(fill="x", expand="false")
 
 bot_frame = tk.Frame(window)
 
@@ -444,6 +447,6 @@ btn_sweep_files = tk.Button(bot_frame,
                             command=sweep_the_folder,
                             font=('TkDefaultFont', 0, 'bold'))
 btn_sweep_files.pack(side="right")
-bot_frame.pack(fill="x")
+bot_frame.pack(fill="x", pady=(25, 0))
 
 window.mainloop()
