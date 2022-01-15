@@ -362,7 +362,6 @@ if os_type == "Windows":  # Set folder locations for Windows Machine
         tk.messagebox.showerror(title="Warning!", message="ProPresenter 7 Installation not found!  Program will end")
         sys.exit()
     pro7_support_file_path = home_dir / "Documents/ProPresenter"
-    media_location = home_dir / "/Documents/ProPresenter/Media"
     if os.path.exists(pro7_app_data_location / "PathSettings.proPaths"):
         path_settings_file = open(pro7_app_data_location / "PathSettings.proPaths", 'r')
         file_lines = path_settings_file.readlines()
