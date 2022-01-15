@@ -360,7 +360,7 @@ if os_type == "Windows":  # Set folder locations for Windows Machine
     pro7_app_data_location = home_dir / "AppData/Roaming/RenewedVision/ProPresenter"
     if not os.path.exists(pro7_app_data_location):
         tk.messagebox.showerror(title="Warning!", message="ProPresenter 7 Installation not found!  Program will end")
-        exit()
+        sys.exit()
     pro7_support_file_path = home_dir / "Documents/ProPresenter"
     media_location = home_dir / "/Documents/ProPresenter/Media"
     if os.path.exists(pro7_app_data_location / "PathSettings.proPaths"):
@@ -381,11 +381,11 @@ elif os_type == "Darwin":  # Set folder locations for Mac Machine
     else:
         tk.messagebox.showerror(title="Warning!", message="ProPresenter 7 Installation not found!  Program will end")
         pro7_support_file_path = Path("Not Found")
-        exit()
+        sys.exit()
 else:
     tk.messagebox.showerror(title="Warning!", message="This OS is not supported!  Pro7 Media Sweeper will exit")
     pro7_support_file_path = Path("Not Found")
-    exit()
+    sys.exit()
 media_location = pro7_support_file_path / "Media"
 
 # Setup GUI
