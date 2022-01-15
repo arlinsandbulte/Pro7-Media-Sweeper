@@ -45,6 +45,10 @@ def get_refs_in_file(file_obj, path, log_file):
     file1.close()
     write_file_line(log_file, "Media References in: " + path.__str__())
     absolute_refs = re.findall(absolute_ref_regex, file_obj.__str__())
+    # Convert absolute_ref_list items from url encoding with % codes to plain text
+    #   This only applies to Mac, but conversion is done on everything, just in case
+    for i in range(len(absolute_refs)):
+        absolute_refs[i] = unquote(absolute_refs[i])
     for ref in absolute_refs:
         write_file_line(log_file, "--Absolute: " + Path(ref).__str__())
     relative_refs = re.findall(relative_ref_regex, file_obj.__str__())
@@ -200,11 +204,6 @@ def sweep_the_folder():
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
 
-    # Convert absolute_ref_list items from url encoding with % codes to plain text
-    #   This only applies to Mac, but conversion is done on everything, just in case
-    for i in range(len(absolute_ref_list)):
-        absolute_ref_list[i] = unquote(absolute_ref_list[i])
-
     # Convert reference lists from text to path objects
     for i in range(len(absolute_ref_list)):
         absolute_ref_list[i] = Path(absolute_ref_list[i])
@@ -225,7 +224,7 @@ def sweep_the_folder():
         ref_count = 0
         # Count file references in absolute_ref_list
         for ref in absolute_ref_list:
-            if media_file.__str__().upper().endswith(ref.__str__().upper()):
+            if ref.__str__().upper().endswith(media_file.__str__().upper()):
                 ref_count = ref_count + 1
         # Count file references in relative_ref_list
         for ref in relative_ref_list:
