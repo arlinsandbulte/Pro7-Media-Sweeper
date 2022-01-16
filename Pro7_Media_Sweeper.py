@@ -5,7 +5,8 @@ import os
 import sys
 import shutil
 import re
-from urllib.parse import unquote
+import unicodedata
+from urllib.parse import *
 from datetime import datetime
 from tkinter import filedialog
 from tkinter import messagebox
@@ -28,14 +29,11 @@ def write_file_line(file, text):
 
 
 # This function returns all reference strings in a Pro7 file
-def get_refs_in_file(file_obj, path, log_file):
+#TODO: the way the uuid_list is passed back and forth is a little messy. probably a better way to do it,
+#like a global variable.
+def get_refs_in_file(file_obj, path, log_file, uuid_list):
     status_label.config(text="Parsing: " + path.name)
     status_label.update()
-
-    # Define regex patterns to find media reference strings in ProPresenter files
-    absolute_ref_regex = r"(?<= absolute_string: \").*(?=\")"
-    relative_ref_regex = r"(?<= relative_path: \").*(?=\")"
-    path_ref_regex = r"(?<= path: \").*(?=\")"
 
     file1 = open(path, mode='rb')
     try:
@@ -44,32 +42,66 @@ def get_refs_in_file(file_obj, path, log_file):
         write_file_line(log_file, 'ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name)
     file1.close()
     write_file_line(log_file, "Media References in: " + path.__str__())
-    absolute_refs = re.findall(absolute_ref_regex, file_obj.__str__())
-    for i in range(len(absolute_refs)):
-        absolute_refs[i] = unquote(absolute_refs[i])  # Convert ref from url encoding with % codes to plain text
-        absolute_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
-                                  lambda match: bytes([int(match[1], 8)]),
-                                  absolute_refs[i].encode('utf-8')).decode('utf-8')
-        absolute_refs[i] = Path(absolute_refs[i])  # Convert string to Path object
-        write_file_line(log_file, "--Absolute: " + absolute_refs[i].__str__())
-    relative_refs = re.findall(relative_ref_regex, file_obj.__str__())
-    for i in range(len(relative_refs)):
-        relative_refs[i] = unquote(relative_refs[i])  # Convert ref from url encoding with % codes to plain text
-        relative_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
-                                  lambda match: bytes([int(match[1], 8)]),
-                                  relative_refs[i].encode('utf-8')).decode('utf-8')
-        relative_refs[i] = Path(relative_refs[i])  # Convert string to Path object
-        write_file_line(log_file, "--Relative: " + relative_refs[i].__str__())
-    path_refs = re.findall(path_ref_regex, file_obj.__str__())
-    for i in range(len(path_refs)):
-        path_refs[i] = unquote(path_refs[i])  # Convert ref from url encoding with % codes to plain text
-        path_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
-                              lambda match: bytes([int(match[1], 8)]),
-                              path_refs[i].encode('utf-8')).decode('utf-8')
-        print(path_refs[i])
-        path_refs[i] = Path(path_refs[i])  # Convert string to Path object
-        write_file_line(log_file, "--Path: " + path_refs[i].__str__())
-    return {"absolute_refs": absolute_refs, "relative_refs": relative_refs, "path_refs": path_refs}
+
+    #Parse the URL objects out of the Protobuffer file
+    url_parse_result = retrieveURLs(file_obj, uuid_list)
+    url_list = url_parse_result["url_list"]
+    updated_uuid_list = url_parse_result["uuid_list"]
+
+    #Pulls the various useful paths out the url objects
+    absolute_refs = []
+    relative_refs = []
+    path_refs = []
+    for url in url_list:
+        if url.absolute_string:
+            absolute_refs.append(unquote(url.absolute_string))
+            write_file_line(log_file, "--Absolute: " + url.absolute_string)
+        if url.relative_path:
+            relative_refs.append(unquote(url.relative_path))
+            write_file_line(log_file, "--Relative: " + url.relative_path)
+        if url.local.path:
+            path_refs.append(unquote(url.local.path))
+            write_file_line(log_file, "--Path: " + url.local.path)
+
+    return {"absolute_refs": absolute_refs, "relative_refs": relative_refs,
+            "path_refs": path_refs, "uuid_list": updated_uuid_list}
+
+#Recursive function that pulls a list of valid URLs from the Protobuf data, as well UUIDs
+def retrieveURLs(obj, uuid_list):
+    updated_uuid_list = uuid_list
+    url_list = []
+    #go through each value in the object.
+    #If there's a non-empty URL, save it
+    #If there's a value labeled UUID, this uniquely identifies this entire object
+    #   If it's empty, that means the object is just a placeholder in data and doesn't have anything useful
+    #   If we've seen this UUID before, it means we've somehow checked this object already, so don't do it again
+    for descriptor in obj.DESCRIPTOR.fields:
+        value = getattr(obj, descriptor.name)
+        if descriptor.type == descriptor.TYPE_MESSAGE:
+            if descriptor.label == descriptor.LABEL_REPEATED:
+                #this is value is  list of multiple objects, check each one
+                for subvalue in value:
+                    result = retrieveURLs(subvalue, updated_uuid_list)
+                    url_list.extend(result["url_list"])
+                    updated_uuid_list = result["uuid_list"]
+            elif descriptor.message_type.name == "URL":
+                if value.absolute_string or value.relative_path or value.local.path:
+                    url_list.append(value)
+            elif descriptor.message_type.name.upper() == "UUID":
+                #we check if the type is UUID, but we also have to check if the value's name is UUID.
+                #otherwise it could just be a reference to a different object, not the object we're on now
+                if descriptor.name.upper() == "UUID":
+                    if not value.string or value.string in uuid_list:
+                        break
+                    else:
+                        #save the uuid as checked
+                        updated_uuid_list.append(value.string)
+            else:
+                #this value has subvalues of it's own, check this object
+                result = retrieveURLs(value, updated_uuid_list)
+                url_list.extend(result["url_list"])
+                updated_uuid_list = result["uuid_list"]
+    return {"url_list": url_list, "uuid_list": updated_uuid_list}
 
 
 # This function deletes all empty folders in a directory.  Takes a Path object input.
@@ -167,6 +199,7 @@ def sweep_the_folder():
     absolute_ref_list = []
     relative_ref_list = []
     path_ref_list = []
+    uuid_list = []
 
     # Find all media file references in .pro presentation files
     for subdir, dirs, files in os.walk(presentation_location):
@@ -174,20 +207,22 @@ def sweep_the_folder():
             if filename.upper().endswith(".PRO"):
                 pro7_file_obj = presentation_pb2.Presentation()
                 filepath = Path(subdir) / Path(filename)
-                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file, uuid_list)
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                uuid_list = file_refs["uuid_list"]
 
     # Find all media file references in PlayList files
     for subdir, dirs, files in os.walk(playlist_location):
         for filename in files:
             pro7_file_obj = propresenter_pb2.PlaylistDocument()
             filepath = Path(subdir) / Path(filename)
-            file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+            file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file, uuid_list)
             absolute_ref_list.extend(file_refs["absolute_refs"])
             relative_ref_list.extend(file_refs["relative_refs"])
             path_ref_list.extend(file_refs["path_refs"])
+            uuid_list = file_refs["uuid_list"]
 
     # Find all media file references in Props config file
     # Find all media file references in Masks (Workspace config file)
@@ -197,24 +232,27 @@ def sweep_the_folder():
             if filename.upper() == "PROPS":
                 pro7_file_obj = propDocument_pb2.PropDocument()
                 filepath = Path(subdir) / Path(filename)
-                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file, uuid_list)
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                uuid_list = file_refs["uuid_list"]
             if filename.upper() == "WORKSPACE":
                 pro7_file_obj = proworkspace_pb2.ProPresenterWorkspace()
                 filepath = Path(subdir) / Path(filename)
-                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file, uuid_list)
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                uuid_list = file_refs["uuid_list"]
             if filename.upper() == "STAGE":
                 pro7_file_obj = stage_pb2.Stage.Document()
                 filepath = Path(subdir) / Path(filename)
-                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
+                file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file, uuid_list)
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                uuid_list = file_refs["uuid_list"]
 
     # Convert reference lists from text to path objects
     for i in range(len(absolute_ref_list)):
