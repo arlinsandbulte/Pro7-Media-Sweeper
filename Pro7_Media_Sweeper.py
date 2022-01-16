@@ -262,25 +262,35 @@ def sweep_the_folder():
     for i in range(len(path_ref_list)):
         path_ref_list[i] = Path(path_ref_list[i])
 
+    # Convert media file list from text to path objects
+    for i in range(len(media_files)):
+        media_files[i] = Path(media_files[i])
+
     # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
     status_label.config(text="Building list of unreferenced files")
     status_label.update()
     files_to_move = []
     for media_file in media_files:
-        ref_count = 0
+        media_file_normalized_string = unicodedata.normalize('NFKD', media_file.__str__()).upper()
+        has_reference = False
         # Count file references in absolute_ref_list
         for ref in absolute_ref_list:
-            if ref.__str__().upper().endswith(media_file.__str__().upper()):
-                ref_count = ref_count + 1
+            if unicodedata.normalize('NFKD', ref.__str__()).upper().endswith(media_file_normalized_string):
+                has_reference = True
+                break
         # Count file references in relative_ref_list
-        for ref in relative_ref_list:
-            if media_file.__str__().upper().endswith(ref.__str__().upper()):
-                ref_count = ref_count + 1
+        if not has_reference:
+            for ref in relative_ref_list:
+                if media_file_normalized_string.endswith(unicodedata.normalize('NFKD', ref.__str__()).upper()):
+                    has_reference = True
+                    break
         # Count file references in path_ref_list
-        for ref in path_ref_list:
-            if media_file.__str__().upper().endswith(ref.__str__().upper()):
-                ref_count = ref_count + 1
-        if ref_count == 0:
+        if not has_reference:
+            for ref in path_ref_list:
+                if media_file_normalized_string.endswith(unicodedata.normalize('NFKD', ref.__str__()).upper()):
+                    has_reference = True
+                    break
+        if not has_reference:
             files_to_move.append(media_file)
 
     # Move all unreferenced media files
