@@ -262,10 +262,6 @@ def sweep_the_folder():
     for i in range(len(path_ref_list)):
         path_ref_list[i] = Path(path_ref_list[i])
 
-    # Convert media file list from text to path objects
-    for i in range(len(media_files)):
-        media_files[i] = Path(media_files[i])
-
     # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
     status_label.config(text="Building list of unreferenced files")
     status_label.update()
