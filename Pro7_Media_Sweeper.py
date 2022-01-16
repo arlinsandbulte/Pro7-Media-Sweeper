@@ -45,18 +45,30 @@ def get_refs_in_file(file_obj, path, log_file):
     file1.close()
     write_file_line(log_file, "Media References in: " + path.__str__())
     absolute_refs = re.findall(absolute_ref_regex, file_obj.__str__())
-    # Convert absolute_ref_list items from url encoding with % codes to plain text
-    #   This only applies to Mac, but conversion is done on everything, just in case
     for i in range(len(absolute_refs)):
-        absolute_refs[i] = unquote(absolute_refs[i])
-    for ref in absolute_refs:
-        write_file_line(log_file, "--Absolute: " + Path(ref).__str__())
+        absolute_refs[i] = unquote(absolute_refs[i])  # Convert ref from url encoding with % codes to plain text
+        absolute_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
+                                  lambda match: bytes([int(match[1], 8)]),
+                                  absolute_refs[i].encode('utf-8')).decode('utf-8')
+        absolute_refs[i] = Path(absolute_refs[i])  # Convert string to Path object
+        write_file_line(log_file, "--Absolute: " + absolute_refs[i].__str__())
     relative_refs = re.findall(relative_ref_regex, file_obj.__str__())
-    for ref in relative_refs:
-        write_file_line(log_file, "--Relative: " + Path(ref).__str__())
+    for i in range(len(relative_refs)):
+        relative_refs[i] = unquote(relative_refs[i])  # Convert ref from url encoding with % codes to plain text
+        relative_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
+                                  lambda match: bytes([int(match[1], 8)]),
+                                  relative_refs[i].encode('utf-8')).decode('utf-8')
+        relative_refs[i] = Path(relative_refs[i])  # Convert string to Path object
+        write_file_line(log_file, "--Relative: " + relative_refs[i].__str__())
     path_refs = re.findall(path_ref_regex, file_obj.__str__())
-    for ref in path_refs:
-        write_file_line(log_file, "--Path: " + Path(ref).__str__())
+    for i in range(len(path_refs)):
+        path_refs[i] = unquote(path_refs[i])  # Convert ref from url encoding with % codes to plain text
+        path_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
+                              lambda match: bytes([int(match[1], 8)]),
+                              path_refs[i].encode('utf-8')).decode('utf-8')
+        print(path_refs[i])
+        path_refs[i] = Path(path_refs[i])  # Convert string to Path object
+        write_file_line(log_file, "--Path: " + path_refs[i].__str__())
     return {"absolute_refs": absolute_refs, "relative_refs": relative_refs, "path_refs": path_refs}
 
 
@@ -211,10 +223,6 @@ def sweep_the_folder():
         relative_ref_list[i] = Path(relative_ref_list[i])
     for i in range(len(path_ref_list)):
         path_ref_list[i] = Path(path_ref_list[i])
-
-    # Convert media file list from text to path objects
-    for i in range(len(media_files)):
-        media_files[i] = Path(media_files[i])
 
     # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
     status_label.config(text="Building list of unreferenced files")
