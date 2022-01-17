@@ -67,7 +67,6 @@ def get_refs_in_file(file_obj, path, log_file):
         path_refs[i] = re.sub(rb'\\([0-7]{3})',  # Replace all escaped 3 octal digits with matching unicode char
                               lambda match: bytes([int(match[1], 8)]),
                               path_refs[i].encode('utf-8')).decode('utf-8')
-        print(path_refs[i])
         path_refs[i] = Path(path_refs[i])  # Convert string to Path object
         write_file_line(log_file, "--Path: " + path_refs[i].__str__())
     return {"absolute_refs": absolute_refs, "relative_refs": relative_refs, "path_refs": path_refs}
