@@ -11,6 +11,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import PhotoImage
 from pathlib import Path
+import requests
 import presentation_pb2  # Used to decode *.pro files
 import propresenter_pb2  # Used to decode PlayList files, which do not have an extension
 import propDocument_pb2  # Used to decode Props configuration file, which does not have an extension
@@ -350,6 +351,19 @@ def undo_sweep():
 
 script_version = "v2.0-RC2"
 
+# Check for latest version of this app on GitHub.
+#  If a newer version is available, notify user in the window titlebar.
+try:
+    response = requests.get("https://api.github.com/repos/arlinsandbulte/Pro7-Media-Sweeper/releases/latest")
+    latest_ver = (response.json()["tag_name"])
+except:
+    latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
+
+if script_version != latest_ver:
+    new_version_avail = " !! New version " + latest_ver + "is available !!"
+else:
+    new_version_avail = ""
+
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
 
@@ -399,7 +413,7 @@ media_location = pro7_support_file_path / "Media"
 window = tk.Tk()
 # icon = PhotoImage()  # TODO get window icon to work with pyinstaller
 # window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
-window.title("Pro7 Media Sweeper - " + script_version)
+window.title("Pro7 Media Sweeper " + script_version + new_version_avail)
 window.config(border=15)
 window.minsize(800, 0)
 window.maxsize(1200, 250)
