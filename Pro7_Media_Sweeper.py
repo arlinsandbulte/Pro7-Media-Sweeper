@@ -121,7 +121,6 @@ def sweep_the_folder():
     ck_sub_folders.config(state="disabled")
     btn_undo_sweep.config(state="disabled")
 
-
     #  Set Button Status indication
     btn_sweep_files.config(state="disabled", relief="sunken")
     btn_sweep_files.update()
@@ -413,7 +412,7 @@ img = PhotoImage(file=img_path)
 image = tk.Label(top_frame, image=img)
 image.pack(side='left', pady=(1, 0))
 
-inside_top_frame = tk.Frame(top_frame, pady=(2))
+inside_top_frame = tk.Frame(top_frame, pady=2)
 
 path_label = tk.Label(inside_top_frame,
                       text="Media Folder to Sweep:",
