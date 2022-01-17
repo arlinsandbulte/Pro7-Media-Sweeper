@@ -23,6 +23,8 @@ import stage_pb2  # Used to decode Stage configuration file.
 def write_file_line(file, text):
     try:
         file.write(text + "\n")
+        # flush log data to disk immediately
+        file.flush()
     except BaseException as err:
         # Something went wrong writing the log file. No further logging will be captured! Display error to user.
         tk.messagebox.showinfo(title="Error!", message=repr(err))
