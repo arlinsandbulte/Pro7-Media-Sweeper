@@ -360,7 +360,7 @@ except:
     latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
 
 if script_version != latest_ver:
-    new_version_avail = " !! New version " + latest_ver + "is available !!"
+    new_version_avail = " !! New version " + latest_ver + " is available !!"
 else:
     new_version_avail = ""
 
@@ -411,8 +411,11 @@ media_location = pro7_support_file_path / "Media"
 
 # Setup GUI
 window = tk.Tk()
-# icon = PhotoImage()  # TODO get window icon to work with pyinstaller
-# window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
+if os_type == "Windows":
+    icon_path = base_path / "resource_files/icons/sweeper.ico"
+    window.iconbitmap(icon_path)
+else:
+    icon_path = base_path / "resource_files/icons/sweeper.icns"  # TODO This is not working on Mac yet.
 window.title("Pro7 Media Sweeper " + script_version + new_version_avail)
 window.config(border=15)
 window.minsize(800, 0)
@@ -421,7 +424,7 @@ window.resizable(True, False)
 
 top_frame = tk.Frame(window)
 
-img_path = base_path / 'icon_files/Sweeper64.png'
+img_path = base_path / 'resource_files/icons/Sweeper64.png'
 img = PhotoImage(file=img_path)
 image = tk.Label(top_frame, image=img)
 image.pack(side='left', pady=(1, 0))
