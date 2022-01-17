@@ -105,6 +105,7 @@ def sweep_the_folder():
     ck_sub_folders.config(state="disabled")
     btn_undo_sweep.config(state="disabled")
 
+
     #  Set Button Status indication
     btn_sweep_files.config(state="disabled", relief="sunken")
     btn_sweep_files.update()
@@ -279,7 +280,7 @@ def sweep_the_folder():
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Set Button Status indication
-    btn_sweep_files.config(state="normal", relief="raised")
+    btn_sweep_files.config(state="normal", relief="groove")
     btn_sweep_files.update()
     status_label.config(text="")
     status_label.update()
@@ -394,56 +395,79 @@ window = tk.Tk()
 # window.iconphoto(False, icon)  # TODO get window icon to work with pyinstaller
 window.title("Pro7 Media Sweeper - " + script_version)
 window.config(border=15)
-window.minsize(600, 100)
-window.maxsize(600, 1000)
-window.resizable(False, False)
+window.minsize(800, 0)
+window.maxsize(1200, 250)
+window.resizable(True, False)
 
 top_frame = tk.Frame(window)
 
 img_path = base_path / 'icon_files/Sweeper64.png'
 img = PhotoImage(file=img_path)
 image = tk.Label(top_frame, image=img)
-image.pack(side="left")
+image.pack(side='left', pady=(1, 0))
 
-inside_top_frame = tk.Frame(top_frame,)
+inside_top_frame = tk.Frame(top_frame, pady=(2))
 
 path_label = tk.Label(inside_top_frame,
                       text="Media Folder to Sweep:",
                       font=('TkDefaultFont', 0, 'bold'))
-path_label.pack(anchor="w")
+path_label.pack(anchor='w')
 
-path_text_frame = tk.Frame(inside_top_frame, relief=tk.SUNKEN, borderwidth=0)
+path_text_frame = tk.Frame(inside_top_frame, relief="groove")
 path_entry = tk.Entry(master=path_text_frame)
 path_entry.insert(0, media_location.__str__())
-path_entry.pack(fill="x")
-path_text_frame.pack(fill="x")
+if os_type == "Windows":
+    path_entry.pack(fill='x', ipady=3)
+    path_text_frame.pack(fill='x', padx=(0, 5))
+else:
+    path_entry.pack(fill='x')
+    path_text_frame.pack(fill='x')
 
-btn_pick_folder = tk.Button(top_frame, text='Change Folder', command=pick_media_folder)
-btn_pick_folder.pack(side="right", anchor="se")
+btn_pick_folder = tk.Button(top_frame, text='Change Folder',
+                            command=pick_media_folder,
+                            relief='groove',
+                            bg='white',
+                            activebackground='white')
+if os_type == "Windows":
+    btn_pick_folder.pack(side='right', anchor='se', ipadx=10)
+else:
+    btn_pick_folder.pack(side='right', anchor='se', pady=(0, 3))
 
-inside_top_frame.pack(fill="x", side="bottom")
-top_frame.pack(side="top", fill="x")
+inside_top_frame.pack(fill='x', side='bottom')
+top_frame.pack(side='top', fill='x')
 
 mid_frame = tk.Frame(window)
+
+status_label = tk.Label(mid_frame, text="")
+status_label.pack(side='left')
+status_label.place(rely='.5', anchor='w')
+
 cb = tk.IntVar(value=1)
 ck_sub_folders = tk.Checkbutton(mid_frame, text='Include All Sub folders', variable=cb, onvalue=1, offvalue=0)
-ck_sub_folders.pack(side="right")
+ck_sub_folders.pack(side='right')
 
-status_label = tk.Label(mid_frame, text="", anchor="w")
-status_label.pack(side="left")
-
-mid_frame.pack(fill="x")
+mid_frame.pack(fill='x')
 
 bot_frame = tk.Frame(window)
 
-btn_undo_sweep = tk.Button(bot_frame, text="Undo a Sweep (Pick Log File)", command=undo_sweep)
-btn_undo_sweep.pack(side="left")
+btn_undo_sweep = tk.Button(bot_frame, text="Undo a Sweep (Pick Log File)",
+                           command=undo_sweep,
+                           relief='groove',
+                           bg='white',
+                           activebackground='white')
+if os_type == "Windows":
+    btn_undo_sweep.pack(side='left', anchor='s', ipadx='10')
+else:
+    btn_undo_sweep.pack(side='left', anchor='s')
 
 btn_sweep_files = tk.Button(bot_frame,
                             text="Sweep Media Files!",
                             command=sweep_the_folder,
-                            font=('TkDefaultFont', 0, 'bold'))
-btn_sweep_files.pack(side="right")
-bot_frame.pack(fill="x")
+                            font=('TkDefaultFont', 0, 'bold'),
+                            relief='groove',
+                            bg='white',
+                            activebackground='white')
+btn_sweep_files.pack(side='right', ipadx='15')
+bot_frame.pack(fill='x', pady=(25, 0))
 
 window.mainloop()
