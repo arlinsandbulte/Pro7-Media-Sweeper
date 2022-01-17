@@ -307,7 +307,8 @@ def undo_sweep():
             line = log_file.readline().rstrip("\n")
             if line.endswith(("v2.0-beta3",
                               "v2.0-RC1",
-                              "v2.0-RC2")):
+                              "v2.0-RC2",
+                              "v2.0-RC3")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -350,12 +351,14 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.0-RC2"
+script_version = "v2.0-RC3"
 
 # Check for latest version of this app on GitHub.
-#  If a newer version is available, notify user in the window titlebar.
+#  If latest release is different, notify user in the window titlebar.
 try:
-    response = requests.get("https://api.github.com/repos/arlinsandbulte/Pro7-Media-Sweeper/releases/latest")
+    # TODO verify=False is probably not a good idea, but error occurs without it when packaged with pyinstaller
+    response = requests.get("https://api.github.com/repos/arlinsandbulte/Pro7-Media-Sweeper/releases/latest",
+                            verify=False)
     latest_ver = (response.json()["tag_name"])
 except:
     latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
