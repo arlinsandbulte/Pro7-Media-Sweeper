@@ -46,7 +46,7 @@ def get_refs_in_file(file_obj, path, log_file):
     except BaseException as err:
         write_file_line(log_file, 'ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name)
     file1.close()
-    write_file_line(log_file, "Media References in: " + path.__str__())
+    write_file_line(log_file, "Find Media References in: " + path.__str__())
     absolute_refs = re.findall(absolute_ref_regex, file_obj.__str__())
     for i in range(len(absolute_refs)):
         absolute_refs[i] = unquote(absolute_refs[i])  # Convert ref from url encoding with % codes to plain text
@@ -54,7 +54,7 @@ def get_refs_in_file(file_obj, path, log_file):
                                   lambda match: bytes([int(match[1], 8)]),
                                   absolute_refs[i].encode('utf-8')).decode('utf-8')
         absolute_refs[i] = Path(absolute_refs[i])  # Convert string to Path object
-        write_file_line(log_file, "--Absolute: " + absolute_refs[i].__str__())
+        write_file_line(log_file, "  Absolute ref: " + absolute_refs[i].__str__())
     relative_refs = re.findall(relative_ref_regex, file_obj.__str__())
     for i in range(len(relative_refs)):
         relative_refs[i] = unquote(relative_refs[i])  # Convert ref from url encoding with % codes to plain text
@@ -62,7 +62,7 @@ def get_refs_in_file(file_obj, path, log_file):
                                   lambda match: bytes([int(match[1], 8)]),
                                   relative_refs[i].encode('utf-8')).decode('utf-8')
         relative_refs[i] = Path(relative_refs[i])  # Convert string to Path object
-        write_file_line(log_file, "--Relative: " + relative_refs[i].__str__())
+        write_file_line(log_file, "  Relative ref: " + relative_refs[i].__str__())
     path_refs = re.findall(path_ref_regex, file_obj.__str__())
     for i in range(len(path_refs)):
         path_refs[i] = unquote(path_refs[i])  # Convert ref from url encoding with % codes to plain text
@@ -70,7 +70,12 @@ def get_refs_in_file(file_obj, path, log_file):
                               lambda match: bytes([int(match[1], 8)]),
                               path_refs[i].encode('utf-8')).decode('utf-8')
         path_refs[i] = Path(path_refs[i])  # Convert string to Path object
-        write_file_line(log_file, "--Path: " + path_refs[i].__str__())
+        write_file_line(log_file, "  Path ref: " + path_refs[i].__str__())
+    write_file_line(log_file,
+                    "  (" +
+                    len(absolute_refs).__str__() + " Absolute refs, " +
+                    len(relative_refs).__str__() + " Relative refs, & " +
+                    len(path_refs).__str__() + " Path refs found.)")
     return {"absolute_refs": absolute_refs, "relative_refs": relative_refs, "path_refs": path_refs}
 
 
