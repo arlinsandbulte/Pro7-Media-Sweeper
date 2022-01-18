@@ -431,6 +431,14 @@ window.minsize(800, 0)
 window.maxsize(1200, 250)
 window.resizable(True, False)
 
+if os_type == "Darwin":
+    menu_bar = tk.Menu(window)
+    app_menu = tk.Menu(menu_bar, name='apple')
+    menu_bar.add_cascade(menu=app_menu)
+    window_menu = tk.Menu(menu_bar, name='window')
+    menu_bar.add_cascade(menu=window_menu, label='Window')
+    window['menu'] = menu_bar
+
 top_frame = tk.Frame(window)
 
 img_path = base_path / 'resource_files/icons/Sweeper64.png'
