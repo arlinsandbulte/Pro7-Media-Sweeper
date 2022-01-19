@@ -434,7 +434,7 @@ if os_type == "Windows":
     window.iconbitmap(icon_path)
 else:
     icon_path = base_path / "resource_files/icons/sweeper.icns"  # TODO This is not working on Mac yet.
-window.title("Pro7 Media Sweeper " + script_version + new_version_avail)
+window.title("Pro7 Media Sweeper " + script_version)
 window.config(border=15)
 window.minsize(800, 0)
 window.maxsize(1200, 250)
@@ -448,28 +448,16 @@ if os_type == "Darwin":
     menu_bar.add_cascade(menu=window_menu, label='Window')
     window['menu'] = menu_bar
 
-
-update_frame = tk.Frame(window)
-
-if os_type == "Windows":
+if script_version != latest_ver:
+    update_frame = tk.Frame(window)
     btn_update = tk.Button(update_frame,
-                           text=new_version_avail,
+                           text="Update Available: " + latest_ver,
                            relief='groove',
                            bg='white',
-                           activebackground='white',
-                           font=('TkDefaultFont', 11, 'bold'),
-                           command=open_update)
-else:
-    btn_update = tk.Button(update_frame,
-                           text=new_version_avail,
-                           relief='groove',
                            font=('TkDefaultFont', 0, 'bold'),
                            command=open_update)
-if script_version != latest_ver:
     btn_update.pack()
-else:
-    btn_update.pack_forget()
-update_frame.pack(anchor='ne')
+    update_frame.pack(anchor='ne')
 
 top_frame = tk.Frame(window)
 
