@@ -377,14 +377,13 @@ except AttributeError:
     base_path = Path(os.path.abspath("."))
 
 # Check for latest version of this app on GitHub.
-#  If latest release is different, notify user in the window titlebar.
+# Do not require SSL certification (i.e. use verify=False).  For this simple update check, it is not worth the
+# effort of maintaining an SSL certificate.  The worst that can happen is a man-in-the-middle could mis-report
+# the latest version.
 try:
     response = requests.get("https://api.github.com/repos/arlinsandbulte/Pro7-Media-Sweeper/releases/latest",
-                            verify=base_path / "resource_files/certifi/cacert.pem")
+                            verify=False)
     latest_ver = (response.json()["tag_name"])
-except requests.exceptions.SSLError:
-    tk.messagebox.showwarning(title="SSL Error", message="Cannot establish secure connection to check for updates")
-    latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
 except requests.exceptions.ConnectionError:
     latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
 
