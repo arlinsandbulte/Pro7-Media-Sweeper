@@ -300,6 +300,14 @@ def sweep_the_folder():
     status_label.update()
 
 
+def open_update():
+    webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/releases/latest')
+
+
+def open_about():
+    webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/wiki')
+
+
 # This function takes undoes a sweep
 def undo_sweep():
     filetypes = (('log files', '*.log'),)
@@ -373,15 +381,6 @@ if script_version != latest_ver:
     new_version_avail = "Update Available"
 else:
     new_version_avail = ""
-
-
-def openupdate():
-    webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/releases/latest')
-
-
-def openabout():
-    webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/wiki')
-
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -459,13 +458,13 @@ if os_type == "Windows":
                            bg='white',
                            activebackground='white',
                            font=('TkDefaultFont', 11, 'bold'),
-                           command=openupdate)
+                           command=open_update)
 else:
     btn_update = tk.Button(update_frame,
                            text=new_version_avail,
                            relief='groove',
                            font=('TkDefaultFont', 0, 'bold'),
-                           command=openupdate)
+                           command=open_update)
 if script_version != latest_ver:
     btn_update.pack()
 else:
@@ -479,7 +478,7 @@ img = PhotoImage(file=img_path)
 
 
 link = tk.Label(top_frame, image=img)
-link.bind("<Button-1>", lambda e: openabout())
+link.bind("<Button-1>", lambda e: open_about())
 link.pack(side='left')
 
 inside_top_frame = tk.Frame(top_frame, pady=2)
