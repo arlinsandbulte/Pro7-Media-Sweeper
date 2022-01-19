@@ -5,13 +5,14 @@ import os
 import sys
 import shutil
 import re
+import webbrowser
+import requests
 from urllib.parse import unquote
 from datetime import datetime
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import PhotoImage
 from pathlib import Path
-import requests
 import presentation_pb2  # Used to decode *.pro files
 import propresenter_pb2  # Used to decode PlayList files, which do not have an extension
 import propDocument_pb2  # Used to decode Props configuration file, which does not have an extension
@@ -129,7 +130,7 @@ def sweep_the_folder():
     btn_undo_sweep.config(state="disabled")
 
     #  Set Button Status indication
-    btn_sweep_files.config(state="disabled", relief="sunken")
+    btn_sweep_files.config(state="disabled", relief="groove")
     btn_sweep_files.update()
 
     log_file_path = Path(home_dir / "Pro7 Media Sweeper" / Path("Sweep_Log (" + timestamp + ").log"))
@@ -274,7 +275,7 @@ def sweep_the_folder():
     remove_empty_directories(sweep_folder_location)
 
     # Set Button Status indication
-    btn_sweep_files.config(state="normal", relief="raised")
+    btn_sweep_files.config(state="normal", relief="groove")
     btn_sweep_files.update()
     status_label.config(text="")
     status_label.update()
@@ -369,9 +370,18 @@ except:
     latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
 
 if script_version != latest_ver:
-    new_version_avail = " !! New version " + latest_ver + " is available !!"
+    new_version_avail = "Update Available"
 else:
     new_version_avail = ""
+
+
+def openupdate():
+    webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/releases/latest')
+
+
+def openabout():
+    webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/wiki')
+
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -439,12 +449,38 @@ if os_type == "Darwin":
     menu_bar.add_cascade(menu=window_menu, label='Window')
     window['menu'] = menu_bar
 
+
+update_frame = tk.Frame(window)
+
+if os_type == "Windows":
+    btn_update = tk.Button(update_frame,
+                           text=new_version_avail,
+                           relief='groove',
+                           bg='white',
+                           activebackground='white',
+                           font=('TkDefaultFont', 11, 'bold'),
+                           command=openupdate)
+else:
+    btn_update = tk.Button(update_frame,
+                           text=new_version_avail,
+                           relief='groove',
+                           font=('TkDefaultFont', 0, 'bold'),
+                           command=openupdate)
+if script_version != latest_ver:
+    btn_update.pack()
+else:
+    btn_update.pack_forget()
+update_frame.pack(anchor='ne')
+
 top_frame = tk.Frame(window)
 
 img_path = base_path / 'resource_files/icons/Sweeper64.png'
 img = PhotoImage(file=img_path)
-image = tk.Label(top_frame, image=img)
-image.pack(side='left', pady=(1, 0))
+
+
+link = tk.Label(top_frame, image=img)
+link.bind("<Button-1>", lambda e: openabout())
+link.pack(side='left')
 
 inside_top_frame = tk.Frame(top_frame, pady=2)
 
@@ -503,7 +539,7 @@ else:
 btn_sweep_files = tk.Button(bot_frame,
                             text="Sweep Media Files!",
                             command=sweep_the_folder,
-                            font=('TkDefaultFont', 0, 'bold'),
+                            font=('TkDefaultFont', 13, 'bold'),
                             relief='groove',
                             bg='white',
                             activebackground='white')
