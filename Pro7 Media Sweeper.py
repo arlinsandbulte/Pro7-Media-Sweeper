@@ -274,18 +274,16 @@ def sweep_the_folder():
     # remove_empty_directories(pathlib_root_dir)
     remove_empty_directories(sweep_folder_location)
 
+    # Set Status indication
+    status_label.config(text="")
+    status_label.update()
+
     # Display pop-up when finished
     if move_count == 0:
         msg = "No Unreferenced Media Files Found."
     else:
         msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
     tk.messagebox.showinfo(title="Done!", message=msg)
-
-    # Set Button Status indication
-    btn_sweep_files.config(state="normal", relief="groove")
-    btn_sweep_files.update()
-    status_label.config(text="")
-    status_label.update()
 
     # Enable window controls while sweep is running
     path_entry.config(state="normal")
@@ -300,10 +298,12 @@ def sweep_the_folder():
     status_label.update()
 
 
+# Function to open latest release webpage on GitHub
 def open_update():
     webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/releases/latest')
 
 
+# Function to open wiki webpage on GitHub
 def open_about():
     webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/wiki')
 
@@ -428,6 +428,8 @@ else:
 media_location = pro7_support_file_path / "Media"
 
 # Setup GUI
+
+# Main Window
 window = tk.Tk()
 if os_type == "Windows":
     icon_path = base_path / "resource_files/icons/sweeper.ico"
@@ -440,6 +442,7 @@ window.minsize(800, 0)
 window.maxsize(1200, 250)
 window.resizable(True, False)
 
+# MacOS Menu bar definition (overrides the default menu bar if not defined)
 if os_type == "Darwin":
     menu_bar = tk.Menu(window)
     app_menu = tk.Menu(menu_bar, name='apple')
@@ -449,6 +452,8 @@ if os_type == "Darwin":
     menu_bar.add_cascade(menu=window_menu, label='Window')
     window['menu'] = menu_bar
 
+# Check for newer version of this app.
+# If a newer version is available, show a button that will open web browser to the latest release
 if script_version != latest_ver:
     update_frame = tk.Frame(window)
     btn_update = tk.Button(update_frame,
@@ -464,7 +469,6 @@ top_frame = tk.Frame(window)
 
 img_path = base_path / 'resource_files/icons/Sweeper64.png'
 img = PhotoImage(file=img_path)
-
 link = tk.Label(top_frame, image=img, cursor='hand2')
 link.bind("<Button-1>", lambda e: open_about())
 link.pack(side='left', padx=(0, 5))
