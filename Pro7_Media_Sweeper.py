@@ -274,6 +274,13 @@ def sweep_the_folder():
     # remove_empty_directories(pathlib_root_dir)
     remove_empty_directories(sweep_folder_location)
 
+    # Display pop-up when finished
+    if move_count == 0:
+        msg = "No Unreferenced Media Files Found."
+    else:
+        msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
+    tk.messagebox.showinfo(title="Done!", message=msg)
+
     # Set Button Status indication
     btn_sweep_files.config(state="normal", relief="groove")
     btn_sweep_files.update()
@@ -285,13 +292,6 @@ def sweep_the_folder():
     btn_pick_folder.config(state="normal")
     ck_sub_folders.config(state="normal")
     btn_undo_sweep.config(state="normal")
-
-    # Display pop-up when finished
-    if move_count == 0:
-        msg = "No Unreferenced Media Files Found."
-    else:
-        msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
-    tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Set Button Status indication
     btn_sweep_files.config(state="normal", relief="groove")
