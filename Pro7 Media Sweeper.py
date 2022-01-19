@@ -367,30 +367,26 @@ def undo_sweep():
 
 script_version = "v2.0-RC3"
 
-# Check for latest version of this app on GitHub.
-#  If latest release is different, notify user in the window titlebar.
-try:
-    # TODO verify=False is probably not a good idea, but error occurs without it when packaged with pyinstaller
-    response = requests.get("https://api.github.com/repos/arlinsandbulte/Pro7-Media-Sweeper/releases/latest",
-                            verify=False)
-    latest_ver = (response.json()["tag_name"])
-except:
-    latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
-
-if script_version != latest_ver:
-    new_version_avail = "Update Available"
-else:
-    new_version_avail = ""
-
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
 
-# noinspection PyBroadException
 try:
     # PyInstaller creates a temp folder and stores path in _MEIPASS
     base_path = Path(sys._MEIPASS)
-except BaseException:
+except AttributeError:
     base_path = Path(os.path.abspath("."))
+
+# Check for latest version of this app on GitHub.
+#  If latest release is different, notify user in the window titlebar.
+try:
+    response = requests.get("https://api.github.com/repos/arlinsandbulte/Pro7-Media-Sweeper/releases/latest",
+                            verify=base_path / "resource_files/certifi/cacert.pem")
+    latest_ver = (response.json()["tag_name"])
+except requests.exceptions.SSLError:
+    tk.messagebox.showwarning(title="SSL Error", message="Cannot establish secure connection to check for updates")
+    latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
+except requests.exceptions.ConnectionError:
+    latest_ver = script_version  # if error connecting to GitHub, make sure no message for new version is shown.
 
 # Get the OS type this script is running on.
 os_type = platform.system()
