@@ -443,6 +443,7 @@ window.resizable(True, False)
 if os_type == "Darwin":
     menu_bar = tk.Menu(window)
     app_menu = tk.Menu(menu_bar, name='apple')
+    app_menu.add_command(label='About Pro7 Media Sweeper', command=open_about)
     menu_bar.add_cascade(menu=app_menu)
     window_menu = tk.Menu(menu_bar, name='window')
     menu_bar.add_cascade(menu=window_menu, label='Window')
