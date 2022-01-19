@@ -465,10 +465,9 @@ top_frame = tk.Frame(window)
 img_path = base_path / 'resource_files/icons/Sweeper64.png'
 img = PhotoImage(file=img_path)
 
-
-link = tk.Label(top_frame, image=img)
+link = tk.Label(top_frame, image=img, cursor='hand2')
 link.bind("<Button-1>", lambda e: open_about())
-link.pack(side='left')
+link.pack(side='left', padx=(0,5))
 
 inside_top_frame = tk.Frame(top_frame, pady=2)
 
@@ -493,7 +492,7 @@ btn_pick_folder = tk.Button(top_frame, text='Change Folder',
                             bg='white',
                             activebackground='white')
 if os_type == "Windows":
-    btn_pick_folder.pack(side='right', anchor='se', ipadx=10)
+    btn_pick_folder.pack(side='right', anchor='se', padx=5, ipadx=10)
 else:
     btn_pick_folder.pack(side='right', anchor='se', pady=(0, 3))
 
