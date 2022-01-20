@@ -366,7 +366,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.0-RC3"
+script_version = "v2.0-RC4"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -456,7 +456,8 @@ if script_version != latest_ver:
                            text="Update Available: " + latest_ver,
                            relief='groove',
                            bg='white',
-                           font=('TkDefaultFont', 0, 'bold'),
+                           activebackground='white',
+                           font=('TkDefaultFont', 13, 'bold'),
                            command=open_update)
     btn_update.pack()
     update_frame.pack(anchor='ne')
