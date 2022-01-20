@@ -323,7 +323,8 @@ def undo_sweep():
             if line.endswith(("v2.0-beta3",
                               "v2.0-RC1",
                               "v2.0-RC2",
-                              "v2.0-RC3")):
+                              "v2.0-RC3",
+                              "v2.0-RC4")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
