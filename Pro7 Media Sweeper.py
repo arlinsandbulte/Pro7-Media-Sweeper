@@ -329,11 +329,12 @@ def undo_sweep():
         line = log_file.readline().rstrip("\n")
         if line.startswith("Pro7 Media Sweeper Log file."):
             line = log_file.readline().rstrip("\n")
-            if line.endswith(("v2.0-beta3",
-                              "v2.0-RC1",
-                              "v2.0-RC2",
-                              "v2.0-RC3",
-                              "v2.0-RC4")):
+            if line.endswith(("2.0-beta3",
+                              "2.0-RC1",
+                              "2.0-RC2",
+                              "2.0-RC3",
+                              "2.0-RC4"
+                              "2.0.RC5")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -376,7 +377,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.0-RC4"
+script_version = "2.0.RC5"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
