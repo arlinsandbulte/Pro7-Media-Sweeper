@@ -333,7 +333,7 @@ def undo_sweep():
                               "2.0-RC1",
                               "2.0-RC2",
                               "2.0-RC3",
-                              "2.0-RC4"
+                              "2.0-RC4",
                               "2.0.RC5")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
