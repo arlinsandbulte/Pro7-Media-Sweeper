@@ -242,6 +242,8 @@ def sweep_the_folder():
     for i in range(len(path_ref_list)):
         path_ref_list[i] = Path(path_ref_list[i])
 
+    write_file_line(log_file, "Done finding all Pro7 media file references.")
+
     # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
     status_label.config(text="Building list of unreferenced files")
     status_label.update()
@@ -263,6 +265,8 @@ def sweep_the_folder():
         if ref_count == 0:
             files_to_move.append(media_file)
 
+    write_file_line(log_file, "Found " + len(files_to_move).__str__() + " unreferenced files to sweep.")
+
     # Move all unreferenced media files
     status_label.config(text="Moving Files")
     status_label.update()
@@ -273,13 +277,23 @@ def sweep_the_folder():
         end = len(move_file_from.__str__())
         end_path = Path(move_file_from.__str__()[start:end])
         move_file_to = move_file_to_root_dir / end_path
-        if not os.path.exists(move_file_to.parent):
-            os.makedirs(move_file_to.parent)
-        shutil.move(move_file_from, move_file_to)
-        write_file_line(log_file, "Moved file from: " + move_file_from.__str__() + "\n" +
-                        "-------------to: " + move_file_to.__str__())
-        move_count = move_count + 1
+        status_label.config(text="Moving " + Path(move_file_from).name.__str__())
+        status_label.update()
+        try:
+            if not os.path.exists(move_file_to.parent):
+                os.makedirs(move_file_to.parent)
+        except BaseException:
+            write_file_line(log_file, "ERROR: Failed to create directory: " + move_file_to.parent.__str__())
+        try:
+            shutil.move(move_file_from, move_file_to)
+            write_file_line(log_file, "Moved file from: " + move_file_from.__str__() + "\n" +
+                            "-------------to: " + move_file_to.__str__())
+            move_count = move_count + 1
+        except BaseException:
+            write_file_line(log_file, "ERROR: Failed to move file: " + move_file_from.__str__())
     write_file_line(log_file, "Sweep is Finished.")
+    write_file_line(log_file, move_count.__str__() + " files moved to: " + move_file_to_root_dir.__str__())
+    log_file.close()
 
     # remove_empty_directories(pathlib_root_dir)
     remove_empty_directories(sweep_folder_location)
@@ -294,8 +308,6 @@ def sweep_the_folder():
         msg = "No Unreferenced Media Files Found."
     else:
         msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
-    write_file_line(log_file, "Sweep results: " + msg)
-    log_file.close()
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Enable window controls while sweep is running
