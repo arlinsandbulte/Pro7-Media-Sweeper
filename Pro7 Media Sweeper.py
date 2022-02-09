@@ -291,13 +291,14 @@ def sweep_the_folder():
             move_count = move_count + 1
         except BaseException:
             write_file_line(log_file, "ERROR: Failed to move file: " + move_file_from.__str__())
+
     write_file_line(log_file, "Sweep is Finished.")
     write_file_line(log_file, move_count.__str__() + " files moved to: " + move_file_to_root_dir.__str__())
-    log_file.close()
 
     # remove_empty_directories(pathlib_root_dir)
     remove_empty_directories(sweep_folder_location)
     write_file_line(log_file, "Removed Empty Directories in Sweep Folder.")
+    log_file.close()
 
     # Set Status indication
     status_label.config(text="")
