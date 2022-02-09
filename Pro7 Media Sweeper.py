@@ -351,7 +351,8 @@ def undo_sweep():
                               "v2.0-RC3",
                               "v2.0-RC4",
                               "v2.0.0-RC5",
-                              "v2.0.0")):
+                              "v2.0.0",
+                              "v2.0.1")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -394,7 +395,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.0.0"
+script_version = "v2.0.1"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
