@@ -279,10 +279,11 @@ def sweep_the_folder():
         write_file_line(log_file, "Moved file from: " + move_file_from.__str__() + "\n" +
                         "-------------to: " + move_file_to.__str__())
         move_count = move_count + 1
-    log_file.close()
+    write_file_line(log_file, "Sweep is Finished.")
 
     # remove_empty_directories(pathlib_root_dir)
     remove_empty_directories(sweep_folder_location)
+    write_file_line(log_file, "Removed Empty Directories in Sweep Folder.")
 
     # Set Status indication
     status_label.config(text="")
@@ -293,6 +294,8 @@ def sweep_the_folder():
         msg = "No Unreferenced Media Files Found."
     else:
         msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
+    write_file_line(log_file, "Sweep results: " + msg)
+    log_file.close()
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Enable window controls while sweep is running
