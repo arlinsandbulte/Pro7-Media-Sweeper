@@ -289,6 +289,7 @@ def sweep_the_folder():
     status_label.config(text="Moving Files")
     status_label.update()
     move_count = 0
+    move_errors = 0
     move_file_to_root_dir = home_dir / "Pro7 Media Sweeper" / Path("Swept Files (" + timestamp + ")")
     for move_file_from in files_to_move:
         start = len(sweep_folder_location.__str__()) + 1
@@ -309,6 +310,7 @@ def sweep_the_folder():
             move_count = move_count + 1
         except (BaseException,):
             write_file_line(log_file, "ERROR: Failed to move file: " + move_file_from.__str__())
+            move_errors = move_errors + 1
 
     write_file_line(log_file, "Sweep is Finished.")
     write_file_line(log_file, move_count.__str__() + "/" + total_files_to_move.__str__() +
@@ -328,10 +330,9 @@ def sweep_the_folder():
         msg = "No Unreferenced Media Files Found."
     else:
         msg = move_count.__str__() + " files moved to\n" + move_file_to_root_dir.__str__()
-        move_errors = total_files_to_move - move_count
-        if move_errors != 0:
-            msg = msg + "\n\n" + move_errors.__str__() + \
-                  " Errors moving files.\nSee log for details (search for \'ERROR:\')."
+    if move_errors != 0:
+        msg = msg + "\n\n" + move_errors.__str__() + \
+              " Errors moving files.\nSee log for details (search for \'ERROR:\')."
     if parse_error_count != 0:
         msg = msg + "\n\n" + parse_error_count.__str__() + \
               " Parse errors that may indicate corrupt Pro7 files.\nSee log for details (search for \'ERROR:\')."
