@@ -307,11 +307,13 @@ def sweep_the_folder():
     status_label.update()
 
     # Display pop-up when finished
-    if move_count == 0:
+    if total_files_to_move == 0:
         msg = "No Unreferenced Media Files Found."
     else:
-        msg = move_count.__str__() + "/" + total_files_to_move.__str__() + \
-              " files\nmoved to\n" + move_file_to_root_dir.__str__()
+        msg = move_count.__str__() + " files moved to\n" + move_file_to_root_dir.__str__()
+        move_errors = total_files_to_move - move_count
+        if move_errors != 0:
+            msg = msg + "\n\n" + move_errors.__str__() + " Errors moving files.  See log for details."
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Enable window controls while sweep is running
