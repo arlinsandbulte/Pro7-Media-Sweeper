@@ -265,7 +265,8 @@ def sweep_the_folder():
         if ref_count == 0:
             files_to_move.append(media_file)
 
-    write_file_line(log_file, "Found " + len(files_to_move).__str__() + " unreferenced files to sweep.")
+    total_files_to_move = len(files_to_move)
+    write_file_line(log_file, "Found " + total_files_to_move.__str__() + " unreferenced files to sweep.")
 
     # Move all unreferenced media files
     status_label.config(text="Moving Files")
@@ -282,18 +283,19 @@ def sweep_the_folder():
         try:
             if not os.path.exists(move_file_to.parent):
                 os.makedirs(move_file_to.parent)
-        except BaseException:
+        except (BaseException,):
             write_file_line(log_file, "ERROR: Failed to create directory: " + move_file_to.parent.__str__())
         try:
             shutil.move(move_file_from, move_file_to)
             write_file_line(log_file, "Moved file from: " + move_file_from.__str__() + "\n" +
                             "-------------to: " + move_file_to.__str__())
             move_count = move_count + 1
-        except BaseException:
+        except (BaseException,):
             write_file_line(log_file, "ERROR: Failed to move file: " + move_file_from.__str__())
 
     write_file_line(log_file, "Sweep is Finished.")
-    write_file_line(log_file, move_count.__str__() + " files moved to: " + move_file_to_root_dir.__str__())
+    write_file_line(log_file, move_count.__str__() + "/" + total_files_to_move.__str__() +
+                    " files moved to: " + move_file_to_root_dir.__str__())
 
     # remove_empty_directories(pathlib_root_dir)
     remove_empty_directories(sweep_folder_location)
@@ -308,7 +310,8 @@ def sweep_the_folder():
     if move_count == 0:
         msg = "No Unreferenced Media Files Found."
     else:
-        msg = move_count.__str__() + " files\nmoved to\n" + move_file_to_root_dir.__str__()
+        msg = move_count.__str__() + "/" + total_files_to_move.__str__() + \
+              " files\nmoved to\n" + move_file_to_root_dir.__str__()
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Enable window controls while sweep is running
