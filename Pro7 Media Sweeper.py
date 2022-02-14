@@ -42,10 +42,12 @@ def get_refs_in_file(file_obj, path, log_file):
     path_ref_regex = r"(?<= path: \").*(?=\")"
 
     file1 = open(path, mode='rb')
+    parse_error = False
     try:
         file_obj.ParseFromString(file1.read())
     except BaseException as err:
         write_file_line(log_file, 'ERROR: ' + repr(err) + ' occurred trying to parse ' + file1.name)
+        parse_error = True
     file1.close()
     write_file_line(log_file, "Find Media References in: " + path.__str__())
     absolute_refs = re.findall(absolute_ref_regex, file_obj.__str__())
@@ -87,7 +89,10 @@ def get_refs_in_file(file_obj, path, log_file):
                     len(absolute_refs).__str__() + " Absolute refs, " +
                     len(relative_refs).__str__() + " Relative refs, & " +
                     len(path_refs).__str__() + " Path refs found.)")
-    return {"absolute_refs": absolute_refs, "relative_refs": relative_refs, "path_refs": path_refs}
+    return {"absolute_refs": absolute_refs,
+            "relative_refs": relative_refs,
+            "path_refs": path_refs,
+            "parse_error": parse_error}
 
 
 # This function deletes all empty folders in a directory.  Takes a Path object input.
@@ -185,6 +190,7 @@ def sweep_the_folder():
     absolute_ref_list = []
     relative_ref_list = []
     path_ref_list = []
+    parse_error_count = 0
 
     # Find all media file references in .pro presentation files
     for subdir, dirs, files in os.walk(presentation_location):
@@ -196,6 +202,8 @@ def sweep_the_folder():
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                if file_refs["parse_error"]:
+                    parse_error_count = parse_error_count + 1
 
     # Find all media file references in PlayList files
     for subdir, dirs, files in os.walk(playlist_location):
@@ -206,6 +214,8 @@ def sweep_the_folder():
             absolute_ref_list.extend(file_refs["absolute_refs"])
             relative_ref_list.extend(file_refs["relative_refs"])
             path_ref_list.extend(file_refs["path_refs"])
+            if file_refs["parse_error"]:
+                parse_error_count = parse_error_count + 1
 
     # Find all media file references in Props config file
     # Find all media file references in Masks (Workspace config file)
@@ -219,6 +229,8 @@ def sweep_the_folder():
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                if file_refs["parse_error"]:
+                    parse_error_count = parse_error_count + 1
             if filename.upper() == "WORKSPACE":
                 pro7_file_obj = proworkspace_pb2.ProPresenterWorkspace()
                 filepath = Path(subdir) / Path(filename)
@@ -226,6 +238,8 @@ def sweep_the_folder():
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                if file_refs["parse_error"]:
+                    parse_error_count = parse_error_count + 1
             if filename.upper() == "STAGE":
                 pro7_file_obj = stage_pb2.Stage.Document()
                 filepath = Path(subdir) / Path(filename)
@@ -233,6 +247,8 @@ def sweep_the_folder():
                 absolute_ref_list.extend(file_refs["absolute_refs"])
                 relative_ref_list.extend(file_refs["relative_refs"])
                 path_ref_list.extend(file_refs["path_refs"])
+                if file_refs["parse_error"]:
+                    parse_error_count = parse_error_count + 1
 
     # Convert reference lists from text to path objects
     for i in range(len(absolute_ref_list)):
@@ -242,7 +258,8 @@ def sweep_the_folder():
     for i in range(len(path_ref_list)):
         path_ref_list[i] = Path(path_ref_list[i])
 
-    write_file_line(log_file, "Done finding all Pro7 media file references.")
+    write_file_line(log_file, "Done finding all Pro7 media file references.\n" +
+                    parse_error_count.__str__() + " Parse Errors.")
 
     # Build list of files that are not used or referenced in ProPresenter, so they can be moved.
     status_label.config(text="Building list of unreferenced files")
@@ -313,7 +330,11 @@ def sweep_the_folder():
         msg = move_count.__str__() + " files moved to\n" + move_file_to_root_dir.__str__()
         move_errors = total_files_to_move - move_count
         if move_errors != 0:
-            msg = msg + "\n\n" + move_errors.__str__() + " Errors moving files.  See log for details."
+            msg = msg + "\n\n" + move_errors.__str__() + \
+                  " Errors moving files.\nSee log for details (search for \'ERROR:\')."
+    if parse_error_count != 0:
+        msg = msg + "\n\n" + parse_error_count.__str__() + \
+              " Parse errors that may indicate corrupt Pro7 files.\nSee log for details (search for \'ERROR:\')."
     tk.messagebox.showinfo(title="Done!", message=msg)
 
     # Enable window controls while sweep is running
