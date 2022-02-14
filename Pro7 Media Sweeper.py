@@ -361,7 +361,7 @@ def open_about():
     webbrowser.open_new('https://github.com/arlinsandbulte/Pro7-Media-Sweeper/wiki')
 
 
-# This function takes undoes a sweep
+# This function undoes a sweep (must input a log file)
 def undo_sweep():
     filetypes = (('log files', '*.log'),)
     log_file_path = filedialog.askopenfilename(title="Open Log file to undo",
@@ -379,7 +379,8 @@ def undo_sweep():
                               "v2.0-RC4",
                               "v2.0.0-RC5",
                               "v2.0.0",
-                              "v2.0.1")):
+                              "v2.0.1",
+                              "v2.1.0")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -422,7 +423,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.0.1"
+script_version = "v2.1.0"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
