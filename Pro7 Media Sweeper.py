@@ -381,7 +381,8 @@ def undo_sweep():
                               "v2.0.0",
                               "v2.0.1",
                               "v2.1.0",
-                              "v2.1.1")):
+                              "v2.1.1"
+                              "v2.1.2")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -424,7 +425,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.1.1"
+script_version = "v2.1.2"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -461,7 +462,7 @@ if os_type == "Windows":  # Set folder locations for Windows Machine
         file_lines = path_settings_file.readlines()
         path_settings_file.close()
         for file_line in file_lines:
-            result = re.search(r"(?<=Base=).*(?=\\\\;)", file_line.strip())
+            result = re.search(r"(?<=Base=).*(?=;)", file_line.strip())
             if result:
                 pro7_support_file_path = Path(result.group(0).replace("\\\\", "/"))
 elif os_type == "Darwin":  # Set folder locations for Mac Machine
