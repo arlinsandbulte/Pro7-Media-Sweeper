@@ -314,9 +314,12 @@ def sweep_the_folder():
     write_file_line(log_file, move_count.__str__() + "/" + total_files_to_move.__str__() +
                     " files moved to: " + move_file_to_root_dir.__str__())
 
-    # remove_empty_directories(pathlib_root_dir)
-    remove_empty_directories(sweep_folder_location)
-    write_file_line(log_file, "Removed Empty Directories in Sweep Folder.")
+    # remove_empty_directories(pathlib_root_dir), if checkbox is checked
+    if db.get() == 1:
+        remove_empty_directories(sweep_folder_location)
+        write_file_line(log_file, "Empty Directories in Sweep Folder were removed.")
+    else:
+        write_file_line(log_file, "Empty Directories in Sweep Folder were not removed.")
     log_file.close()
 
     # Set Status indication
@@ -571,6 +574,14 @@ ck_sub_folders = tk.Checkbutton(mid_frame, text='Include All Sub folders', varia
 ck_sub_folders.pack(side='right')
 
 mid_frame.pack(fill='x')
+
+mid2_frame = tk.Frame(window)
+
+db = tk.IntVar(value=0)
+del_sub_folders = tk.Checkbutton(mid2_frame, text='Delete empty folders', variable=db, onvalue=1, offvalue=0)
+del_sub_folders.pack(side='right')
+
+mid2_frame.pack(fill='x')
 
 bot_frame = tk.Frame(window)
 
