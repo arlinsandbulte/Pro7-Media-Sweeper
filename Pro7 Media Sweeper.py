@@ -105,10 +105,8 @@ def remove_empty_directories(pathlib_root_dir):
         reverse=True,
     )
     for pdir in dir_list:
-        try:
+        if len(os.listdir(pdir)) == 0:  # check if directory is empty
             pdir.rmdir()  # remove directory if empty
-        except OSError:
-            continue  # catch and continue if non-empty
 
 
 # This function pops up a folder picking dialog and sets the path in the text entry box.
