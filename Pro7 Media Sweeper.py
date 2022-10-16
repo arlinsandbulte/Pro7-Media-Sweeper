@@ -140,6 +140,7 @@ def sweep_the_folder():
     path_entry.config(state="disabled")
     btn_pick_folder.config(state="disabled")
     ck_sub_folders.config(state="disabled")
+    del_sub_folders.config(state="disabled")
     btn_undo_sweep.config(state="disabled")
 
     #  Set Button Status indication
@@ -343,6 +344,7 @@ def sweep_the_folder():
     path_entry.config(state="normal")
     btn_pick_folder.config(state="normal")
     ck_sub_folders.config(state="normal")
+    del_sub_folders.config(state="normal")
     btn_undo_sweep.config(state="normal")
 
     # Set Button Status indication
