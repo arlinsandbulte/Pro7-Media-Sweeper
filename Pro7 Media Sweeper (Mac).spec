@@ -42,4 +42,4 @@ app = BUNDLE(exe,
              name='Pro7 Media Sweeper.app',
              icon='resource_files/icons/sweeper.icns',
              bundle_identifier=None,
-             version='2.2.0')
+             version='2.3.0')
