@@ -18,6 +18,7 @@ import propresenter_pb2  # Used to decode PlayList files, which do not have an e
 import propDocument_pb2  # Used to decode Props configuration file, which does not have an extension
 import proworkspace_pb2  # Used to decode Workspace configuration file, which contains Mask info
 import stage_pb2  # Used to decode Stage configuration file.
+import playlistTemplate_pb2  # Used to decode Playlist Template files, which do not have an extension
 
 
 # Write to file (add new line at end and catch errors)
@@ -207,7 +208,10 @@ def sweep_the_folder():
     # Find all media file references in PlayList files
     for subdir, dirs, files in os.walk(playlist_location):
         for filename in files:
-            pro7_file_obj = propresenter_pb2.PlaylistDocument()
+            if filename == "PlaylistTemplates":
+                pro7_file_obj = playlistTemplate_pb2.PlaylistTemplate()
+            else:
+                pro7_file_obj = propresenter_pb2.PlaylistDocument()
             filepath = Path(subdir) / Path(filename)
             file_refs = get_refs_in_file(pro7_file_obj, filepath, log_file)
             absolute_ref_list.extend(file_refs["absolute_refs"])
@@ -386,7 +390,8 @@ def undo_sweep():
                               "v2.1.0",
                               "v2.1.1",
                               "v2.1.2",
-                              "v2.2.0")):
+                              "v2.2.0",
+                              "v2.3.0")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -429,7 +434,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.2.0"
+script_version = "v2.3.0"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
