@@ -393,7 +393,8 @@ def undo_sweep():
                               "v2.1.2",
                               "v2.2.0",
                               "v2.3.0",
-                              "v2.3.1")):
+                              "v2.3.1",
+                              "v2.3.2")):
                 moved_files_found_count = 0
                 files_moved_back_count = 0
                 matching_to_not_found_count = 0
@@ -436,7 +437,7 @@ def undo_sweep():
 
 # Main program execution begins here ***********************************************************************************
 
-script_version = "v2.3.1"
+script_version = "v2.3.2"
 
 # Get the user's home_dir directory
 home_dir = Path.expanduser(Path.home())
@@ -467,7 +468,7 @@ if os_type == "Windows":  # Set folder locations for Windows Machine
     if not os.path.exists(pro7_app_data_location):
         tk.messagebox.showerror(title="Warning!", message="ProPresenter 7 Installation not found!  Program will end")
         sys.exit()
-    pro7_support_file_path = Path(userpaths.get_my_documents())
+    pro7_support_file_path = Path(userpaths.get_my_documents()) / "ProPresenter"
     if os.path.exists(pro7_app_data_location / "PathSettings.proPaths"):
         path_settings_file = open(pro7_app_data_location / "PathSettings.proPaths", 'r')
         file_lines = path_settings_file.readlines()
