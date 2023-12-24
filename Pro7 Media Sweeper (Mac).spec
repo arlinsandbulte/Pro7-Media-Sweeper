@@ -35,11 +35,11 @@ exe = EXE(pyz,
           runtime_tmpdir=None,
           console=False,
           disable_windowed_traceback=False,
-          target_arch='x86_64',
+          target_arch='universal2', # -*- x86_64, arm64, universal2 -*-
           codesign_identity=None,
           entitlements_file=None , icon='resource_files/icons/sweeper.icns')
 app = BUNDLE(exe,
              name='Pro7 Media Sweeper.app',
              icon='resource_files/icons/sweeper.icns',
              bundle_identifier=None,
-             version='2.3.0')
+             version='2.3.3')
