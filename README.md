@@ -12,6 +12,10 @@ All swept files are moved into a new directory where they can be reviewed, resto
 
 **WARNING!**  ANY AND ALL files in the chosen sweep directory that are not used in any ProPresenter7 playlist, *.pro document, prop, stage display, or mask _WILL_ be moved to a new location where they can be reviewed and deleted.  This applies to all files and file types!  More than just media files may be moved if other files also exist in the chosen folder.
 
+## If you get an error when trying to run Pro7 Media Sweeper:
+![Windows Error](resource_files/icons/Windows%20Error.jpg)
+![Mac Error](resource_files/icons/Mac%20Error.jpg)
+
 ## How it works:
 1. The utility first builds a list of all referenced files in your ProPresenter installation.  
 ProPresetner files are decoded using reverse engineered Google Protocol Buffer files from Dan Owen, which can be found [here: https://github.com/greyshirtguy/ProPresenter7-Proto](https://github.com/greyshirtguy/ProPresenter7-Proto) (THANKS DAN!).
