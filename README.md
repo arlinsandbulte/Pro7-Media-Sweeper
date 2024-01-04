@@ -1,12 +1,17 @@
 # Pro7-Media-Sweeper
-Find and sweep media files that are not being used by ProPresenter7
+Find and sweep orphaned media files that are not being used by ProPresenter7.
 
 ## Description:
-This utility will find and sweep out all files of a selected folder that ProPresenter7 does not use in any playlist, library presentation document, prop, stage display, or mask.
-All swept files are moved into a new directory where they can be reviewed, restored, and/or deleted.
+ProPresenter makes it VERY easy to accumulate lots of media files that are no longer used or needed (I’ll call them orphaned media files).  This can quickly fill up your storage space and even affect performance.
+But, ProPresenter has no easy way to find or identify orphaned media files.
+Until now!  That is exactly what Pro7 Media Sweeper does.
+
+This utility will find and sweep up all orphaned files in a selected folder that ProPresenter7 does not reference in any playlist, library presentation document, prop, stage display, or mask.  
+The **orphaned files are NOT DELETED.**  **They ARE MOVED** into a new folder where you can review, restore, and/or delete them yourself.  
+A log file is also created each time Pro7 Media Sweeper is run.  This log is human readable and can be used to see exactly what happens each time a sweep is performed.  The log can also be used to undo a sweep automatically.
 
 ## Usage:
-1. User can choose which folder to sweep.  The default folder location is ProPresenter's 'Media' folder (location set in Pro7's Support Files setting in advanced preferences).  This is ProPresenter7’s default media storage folder when the “Manage Media Automatically” option is checked in ProPresenter7's Advanced Preferences.
+1. User can choose which folder to sweep.  The default folder is ProPresenter's 'Media' folder (location set in Pro7's Support Files setting in advanced preferences).  This is ProPresenter7’s default media storage folder when the “Manage Media Automatically” option is checked in ProPresenter7's Advanced Preferences.
 2. Select whether subdirectories should be included.  Including subdirectories will recursively clean all files in the selected directory and any subdirectories within the chosen directory.  This option is checked by default.
 3. Click the 'Sweep Media Files!' button to start the process of sweeping all unused files.  A log file will be generated and all unused media files will be moved to a folder in '~/Documents/Pro7 Media Sweeper/'  
 
